@@ -11,6 +11,7 @@ from jsonrpcbase import JSONRPCService, InvalidParamsError, KeywordError,\
 from os import environ
 from ConfigParser import ConfigParser
 from biokbase import log
+import biokbase.nexus
 import requests as _requests
 import urlparse as _urlparse
 import random as _random
@@ -36,14 +37,14 @@ def get_config():
     retconfig = {}
     config = ConfigParser()
     config.read(get_config_file())
-    for nameval in config.items(get_service_name() or 'kb_muscle'):
+    for nameval in config.items(get_service_name() or 'kb_vsearch'):
         retconfig[nameval[0]] = nameval[1]
     return retconfig
 
 config = get_config()
 
-from kb_muscle.kb_muscleImpl import kb_muscle
-impl_kb_muscle = kb_muscle(config)
+from kb_muscle.kb_muscleImpl import kb_vsearch
+impl_kb_vsearch = kb_vsearch(config)
 
 
 class JSONObjectEncoder(json.JSONEncoder):
@@ -60,6 +61,12 @@ class JSONObjectEncoder(json.JSONEncoder):
 sync_methods = {}
 async_run_methods = {}
 async_check_methods = {}
+async_run_methods['kb_vsearch.MUSCLE_nuc_async'] = ['kb_vsearch', 'MUSCLE_nuc']
+async_check_methods['kb_vsearch.MUSCLE_nuc_check'] = ['kb_vsearch', 'MUSCLE_nuc']
+sync_methods['kb_vsearch.MUSCLE_nuc'] = True
+async_run_methods['kb_vsearch.MUSCLE_prot_async'] = ['kb_vsearch', 'MUSCLE_prot']
+async_check_methods['kb_vsearch.MUSCLE_prot_check'] = ['kb_vsearch', 'MUSCLE_prot']
+sync_methods['kb_vsearch.MUSCLE_prot'] = True
 
 class AsyncJobServiceClient(object):
 
@@ -320,7 +327,7 @@ class Application(object):
                                    context['method'], context['call_id'])
 
     def __init__(self):
-        submod = get_service_name() or 'kb_muscle'
+        submod = get_service_name() or 'kb_vsearch'
         self.userlog = log.log(
             submod, ip_address=True, authuser=True, module=True, method=True,
             call_id=True, changecallback=self.logcallback,
@@ -330,6 +337,20 @@ class Application(object):
             call_id=True, logfile=self.userlog.get_log_file())
         self.serverlog.set_log_level(6)
         self.rpc_service = JSONRPCServiceCustom()
+        self.method_authentication = dict()
+        self.rpc_service.add(impl_kb_vsearch.MUSCLE_nuc,
+                             name='kb_vsearch.MUSCLE_nuc',
+                             types=[dict])
+        self.method_authentication['kb_vsearch.MUSCLE_nuc'] = 'required'
+        self.rpc_service.add(impl_kb_vsearch.MUSCLE_prot,
+                             name='kb_vsearch.MUSCLE_prot',
+                             types=[dict])
+        self.method_authentication['kb_vsearch.MUSCLE_prot'] = 'required'
+        self.auth_client = biokbase.nexus.Client(
+            config={'server': 'nexus.api.globusonline.org',
+                    'verify_ssl': True,
+                    'client': None,
+                    'client_secret': None})
 
     def __call__(self, environ, start_response):
         # Context object, equivalent to the perl impl CallContext
@@ -364,6 +385,37 @@ class Application(object):
                                'method_params': req['params']}
                 ctx['provenance'] = [prov_action]
                 try:
+                    token = environ.get('HTTP_AUTHORIZATION')
+                    # parse out the method being requested and check if it
+                    # has an authentication requirement
+                    method_name = req['method']
+                    if method_name in async_run_methods:
+                        method_name = async_run_methods[method_name][0] + "." + async_run_methods[method_name][1]
+                    if method_name in async_check_methods:
+                        method_name = async_check_methods[method_name][0] + "." + async_check_methods[method_name][1]
+                    auth_req = self.method_authentication.get(method_name,
+                                                              "none")
+                    if auth_req != "none":
+                        if token is None and auth_req == 'required':
+                            err = ServerError()
+                            err.data = "Authentication required for " + \
+                                "kb_vsearch but no authentication header was passed"
+                            raise err
+                        elif token is None and auth_req == 'optional':
+                            pass
+                        else:
+                            try:
+                                user, _, _ = \
+                                    self.auth_client.validate_token(token)
+                                ctx['user_id'] = user
+                                ctx['authenticated'] = 1
+                                ctx['token'] = token
+                            except Exception, e:
+                                if auth_req == 'required':
+                                    err = ServerError()
+                                    err.data = \
+                                        "Token validation failed: %s" % e
+                                    raise err
                     if (environ.get('HTTP_X_FORWARDED_FOR')):
                         self.log(log.INFO, ctx, 'X-Forwarded-For: ' +
                                  environ.get('HTTP_X_FORWARDED_FOR'))
@@ -547,6 +599,11 @@ def process_async_cli(input_file_path, output_file_path, token):
     if 'id' not in req: 
         req['id'] = str(_random.random())[2:]
     ctx = MethodContext(application.userlog)
+    if token:
+        user, _, _ = application.auth_client.validate_token(token)
+        ctx['user_id'] = user
+        ctx['authenticated'] = 1
+        ctx['token'] = token
     if 'context' in req:
         ctx['rpc_context'] = req['context']
     ctx['CLI'] = 1

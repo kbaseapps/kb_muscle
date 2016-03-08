@@ -2,13 +2,16 @@
 #END_HEADER
 
 
-class kb_muscle:
+class kb_vsearch:
     '''
     Module Name:
-    kb_muscle
+    kb_vsearch
 
     Module Description:
-    A KBase module: kb_muscle
+    ** A KBase module: kb_muscle
+**
+** This module runs MUSCLE to make MSAs of either DNA or PROTEIN sequences
+**
     '''
 
     ######## WARNING FOR GEVENT USERS #######
@@ -26,3 +29,29 @@ class kb_muscle:
         #BEGIN_CONSTRUCTOR
         #END_CONSTRUCTOR
         pass
+
+    def MUSCLE_nuc(self, ctx, params):
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN MUSCLE_nuc
+        #END MUSCLE_nuc
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method MUSCLE_nuc return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
+
+    def MUSCLE_prot(self, ctx, params):
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN MUSCLE_prot
+        #END MUSCLE_prot
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method MUSCLE_prot return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
