@@ -41,6 +41,5 @@ parameters :
 description : |
     <p>This method builds a Multiple Sequence Alignment (MSA) of protein sequences with MUSCLE.</p>
     <p>MUSCLE 3.8.425 from http://www.drive5.com/muscle/</p>
-    <p>Please cite: <A HREF="http://nar.oxfordjournals.org/content/32/5/1792.full.pdf+html">Edgar, R.C. (2004) MUSCLE: multiple sequence alignment with high accuracy and high throughput.Nucleic Acids Res. 32(5):1792-1797.</A>
-doi:10.1093/nar/gkh340</p>
-
+    <p>Please cite\: <A HREF="http\://nar.oxfordjournals.org/content/32/5/1792.full.pdf+html">Edgar, R.C. (2004) MUSCLE\: multiple sequence alignment with high accuracy and high throughput.Nucleic Acids Res. 32(5)\:1792-1797.</A>
+doi\:10.1093/nar/gkh340</p>
