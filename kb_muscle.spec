@@ -5,7 +5,7 @@
 ** 
 */
 
-module kb_vsearch {
+module kb_muscle {
 
     /* 
     ** The workspace object refs are of form:
@@ -21,7 +21,7 @@ module kb_vsearch {
     typedef string data_obj_ref;
 
 
-    /* VSearch BasicSearch Input Params
+    /* MUSCLE Input Params
     */
     typedef structure {
         workspace_name workspace_name;
@@ -30,7 +30,7 @@ module kb_vsearch {
     } MUSCLE_Params;
 
 
-    /* VSearch BasicSearch Output
+    /* MUSCLE Output
     */
     typedef structure {
 	data_obj_name report_name;
