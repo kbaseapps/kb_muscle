@@ -27,6 +27,8 @@ module kb_muscle {
         workspace_name workspace_name;
 	data_obj_name  input_name;
         data_obj_name  output_name;
+	int            maxiters;
+	float          maxhours;
     } MUSCLE_Params;
 
 

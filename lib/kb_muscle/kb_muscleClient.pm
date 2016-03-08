@@ -129,6 +129,8 @@ MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
 	input_name has a value which is a kb_muscle.data_obj_name
 	output_name has a value which is a kb_muscle.data_obj_name
+	maxiters has a value which is a float
+	maxhours has a value which is a float
 workspace_name is a string
 data_obj_name is a string
 MUSCLE_Output is a reference to a hash where the following keys are defined:
@@ -148,6 +150,8 @@ MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
 	input_name has a value which is a kb_muscle.data_obj_name
 	output_name has a value which is a kb_muscle.data_obj_name
+	maxiters has a value which is a float
+	maxhours has a value which is a float
 workspace_name is a string
 data_obj_name is a string
 MUSCLE_Output is a reference to a hash where the following keys are defined:
@@ -234,6 +238,8 @@ MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
 	input_name has a value which is a kb_muscle.data_obj_name
 	output_name has a value which is a kb_muscle.data_obj_name
+	maxiters has a value which is a float
+	maxhours has a value which is a float
 workspace_name is a string
 data_obj_name is a string
 MUSCLE_Output is a reference to a hash where the following keys are defined:
@@ -253,6 +259,8 @@ MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
 	input_name has a value which is a kb_muscle.data_obj_name
 	output_name has a value which is a kb_muscle.data_obj_name
+	maxiters has a value which is a float
+	maxhours has a value which is a float
 workspace_name is a string
 data_obj_name is a string
 MUSCLE_Output is a reference to a hash where the following keys are defined:
@@ -484,6 +492,8 @@ a reference to a hash where the following keys are defined:
 workspace_name has a value which is a kb_muscle.workspace_name
 input_name has a value which is a kb_muscle.data_obj_name
 output_name has a value which is a kb_muscle.data_obj_name
+maxiters has a value which is a float
+maxhours has a value which is a float
 
 </pre>
 
@@ -495,6 +505,8 @@ a reference to a hash where the following keys are defined:
 workspace_name has a value which is a kb_muscle.workspace_name
 input_name has a value which is a kb_muscle.data_obj_name
 output_name has a value which is a kb_muscle.data_obj_name
+maxiters has a value which is a float
+maxhours has a value which is a float
 
 
 =end text
