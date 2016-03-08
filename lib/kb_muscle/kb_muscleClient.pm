@@ -123,17 +123,17 @@ sub new
 =begin html
 
 <pre>
-$params is a kb_vsearch.MUSCLE_Params
-$return is a kb_vsearch.MUSCLE_Output
+$params is a kb_muscle.MUSCLE_Params
+$return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
-	workspace_name has a value which is a kb_vsearch.workspace_name
-	input_name has a value which is a kb_vsearch.data_obj_name
-	output_name has a value which is a kb_vsearch.data_obj_name
+	workspace_name has a value which is a kb_muscle.workspace_name
+	input_name has a value which is a kb_muscle.data_obj_name
+	output_name has a value which is a kb_muscle.data_obj_name
 workspace_name is a string
 data_obj_name is a string
 MUSCLE_Output is a reference to a hash where the following keys are defined:
-	report_name has a value which is a kb_vsearch.data_obj_name
-	report_ref has a value which is a kb_vsearch.data_obj_ref
+	report_name has a value which is a kb_muscle.data_obj_name
+	report_ref has a value which is a kb_muscle.data_obj_ref
 data_obj_ref is a string
 
 </pre>
@@ -142,17 +142,17 @@ data_obj_ref is a string
 
 =begin text
 
-$params is a kb_vsearch.MUSCLE_Params
-$return is a kb_vsearch.MUSCLE_Output
+$params is a kb_muscle.MUSCLE_Params
+$return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
-	workspace_name has a value which is a kb_vsearch.workspace_name
-	input_name has a value which is a kb_vsearch.data_obj_name
-	output_name has a value which is a kb_vsearch.data_obj_name
+	workspace_name has a value which is a kb_muscle.workspace_name
+	input_name has a value which is a kb_muscle.data_obj_name
+	output_name has a value which is a kb_muscle.data_obj_name
 workspace_name is a string
 data_obj_name is a string
 MUSCLE_Output is a reference to a hash where the following keys are defined:
-	report_name has a value which is a kb_vsearch.data_obj_name
-	report_ref has a value which is a kb_vsearch.data_obj_ref
+	report_name has a value which is a kb_muscle.data_obj_name
+	report_ref has a value which is a kb_muscle.data_obj_ref
 data_obj_ref is a string
 
 
@@ -194,7 +194,7 @@ Methods for MSA building of either DNA or PROTEIN sequences
     }
 
     my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "kb_vsearch.MUSCLE_nuc",
+	method => "kb_muscle.MUSCLE_nuc",
 	params => \@args,
     });
     if ($result) {
@@ -228,17 +228,17 @@ Methods for MSA building of either DNA or PROTEIN sequences
 =begin html
 
 <pre>
-$params is a kb_vsearch.MUSCLE_Params
-$return is a kb_vsearch.MUSCLE_Output
+$params is a kb_muscle.MUSCLE_Params
+$return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
-	workspace_name has a value which is a kb_vsearch.workspace_name
-	input_name has a value which is a kb_vsearch.data_obj_name
-	output_name has a value which is a kb_vsearch.data_obj_name
+	workspace_name has a value which is a kb_muscle.workspace_name
+	input_name has a value which is a kb_muscle.data_obj_name
+	output_name has a value which is a kb_muscle.data_obj_name
 workspace_name is a string
 data_obj_name is a string
 MUSCLE_Output is a reference to a hash where the following keys are defined:
-	report_name has a value which is a kb_vsearch.data_obj_name
-	report_ref has a value which is a kb_vsearch.data_obj_ref
+	report_name has a value which is a kb_muscle.data_obj_name
+	report_ref has a value which is a kb_muscle.data_obj_ref
 data_obj_ref is a string
 
 </pre>
@@ -247,17 +247,17 @@ data_obj_ref is a string
 
 =begin text
 
-$params is a kb_vsearch.MUSCLE_Params
-$return is a kb_vsearch.MUSCLE_Output
+$params is a kb_muscle.MUSCLE_Params
+$return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
-	workspace_name has a value which is a kb_vsearch.workspace_name
-	input_name has a value which is a kb_vsearch.data_obj_name
-	output_name has a value which is a kb_vsearch.data_obj_name
+	workspace_name has a value which is a kb_muscle.workspace_name
+	input_name has a value which is a kb_muscle.data_obj_name
+	output_name has a value which is a kb_muscle.data_obj_name
 workspace_name is a string
 data_obj_name is a string
 MUSCLE_Output is a reference to a hash where the following keys are defined:
-	report_name has a value which is a kb_vsearch.data_obj_name
-	report_ref has a value which is a kb_vsearch.data_obj_ref
+	report_name has a value which is a kb_muscle.data_obj_name
+	report_ref has a value which is a kb_muscle.data_obj_ref
 data_obj_ref is a string
 
 
@@ -295,7 +295,7 @@ data_obj_ref is a string
     }
 
     my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "kb_vsearch.MUSCLE_prot",
+	method => "kb_muscle.MUSCLE_prot",
 	params => \@args,
     });
     if ($result) {
@@ -321,7 +321,7 @@ data_obj_ref is a string
 sub version {
     my ($self) = @_;
     my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-        method => "kb_vsearch.version",
+        method => "kb_muscle.version",
         params => [],
     });
     if ($result) {
@@ -472,7 +472,7 @@ a string
 
 =item Description
 
-VSearch BasicSearch Input Params
+MUSCLE Input Params
 
 
 =item Definition
@@ -481,9 +481,9 @@ VSearch BasicSearch Input Params
 
 <pre>
 a reference to a hash where the following keys are defined:
-workspace_name has a value which is a kb_vsearch.workspace_name
-input_name has a value which is a kb_vsearch.data_obj_name
-output_name has a value which is a kb_vsearch.data_obj_name
+workspace_name has a value which is a kb_muscle.workspace_name
+input_name has a value which is a kb_muscle.data_obj_name
+output_name has a value which is a kb_muscle.data_obj_name
 
 </pre>
 
@@ -492,9 +492,9 @@ output_name has a value which is a kb_vsearch.data_obj_name
 =begin text
 
 a reference to a hash where the following keys are defined:
-workspace_name has a value which is a kb_vsearch.workspace_name
-input_name has a value which is a kb_vsearch.data_obj_name
-output_name has a value which is a kb_vsearch.data_obj_name
+workspace_name has a value which is a kb_muscle.workspace_name
+input_name has a value which is a kb_muscle.data_obj_name
+output_name has a value which is a kb_muscle.data_obj_name
 
 
 =end text
@@ -511,7 +511,7 @@ output_name has a value which is a kb_vsearch.data_obj_name
 
 =item Description
 
-VSearch BasicSearch Output
+MUSCLE Output
 
 
 =item Definition
@@ -520,8 +520,8 @@ VSearch BasicSearch Output
 
 <pre>
 a reference to a hash where the following keys are defined:
-report_name has a value which is a kb_vsearch.data_obj_name
-report_ref has a value which is a kb_vsearch.data_obj_ref
+report_name has a value which is a kb_muscle.data_obj_name
+report_ref has a value which is a kb_muscle.data_obj_ref
 
 </pre>
 
@@ -530,8 +530,8 @@ report_ref has a value which is a kb_vsearch.data_obj_ref
 =begin text
 
 a reference to a hash where the following keys are defined:
-report_name has a value which is a kb_vsearch.data_obj_name
-report_ref has a value which is a kb_vsearch.data_obj_ref
+report_name has a value which is a kb_muscle.data_obj_name
+report_ref has a value which is a kb_muscle.data_obj_ref
 
 
 =end text

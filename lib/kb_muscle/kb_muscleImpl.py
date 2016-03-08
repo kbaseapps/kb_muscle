@@ -2,10 +2,10 @@
 #END_HEADER
 
 
-class kb_vsearch:
+class kb_muscle:
     '''
     Module Name:
-    kb_vsearch
+    kb_muscle
 
     Module Description:
     ** A KBase module: kb_muscle

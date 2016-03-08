@@ -37,14 +37,14 @@ def get_config():
     retconfig = {}
     config = ConfigParser()
     config.read(get_config_file())
-    for nameval in config.items(get_service_name() or 'kb_vsearch'):
+    for nameval in config.items(get_service_name() or 'kb_muscle'):
         retconfig[nameval[0]] = nameval[1]
     return retconfig
 
 config = get_config()
 
-from kb_muscle.kb_muscleImpl import kb_vsearch
-impl_kb_vsearch = kb_vsearch(config)
+from kb_muscle.kb_muscleImpl import kb_muscle
+impl_kb_muscle = kb_muscle(config)
 
 
 class JSONObjectEncoder(json.JSONEncoder):
@@ -61,12 +61,12 @@ class JSONObjectEncoder(json.JSONEncoder):
 sync_methods = {}
 async_run_methods = {}
 async_check_methods = {}
-async_run_methods['kb_vsearch.MUSCLE_nuc_async'] = ['kb_vsearch', 'MUSCLE_nuc']
-async_check_methods['kb_vsearch.MUSCLE_nuc_check'] = ['kb_vsearch', 'MUSCLE_nuc']
-sync_methods['kb_vsearch.MUSCLE_nuc'] = True
-async_run_methods['kb_vsearch.MUSCLE_prot_async'] = ['kb_vsearch', 'MUSCLE_prot']
-async_check_methods['kb_vsearch.MUSCLE_prot_check'] = ['kb_vsearch', 'MUSCLE_prot']
-sync_methods['kb_vsearch.MUSCLE_prot'] = True
+async_run_methods['kb_muscle.MUSCLE_nuc_async'] = ['kb_muscle', 'MUSCLE_nuc']
+async_check_methods['kb_muscle.MUSCLE_nuc_check'] = ['kb_muscle', 'MUSCLE_nuc']
+sync_methods['kb_muscle.MUSCLE_nuc'] = True
+async_run_methods['kb_muscle.MUSCLE_prot_async'] = ['kb_muscle', 'MUSCLE_prot']
+async_check_methods['kb_muscle.MUSCLE_prot_check'] = ['kb_muscle', 'MUSCLE_prot']
+sync_methods['kb_muscle.MUSCLE_prot'] = True
 
 class AsyncJobServiceClient(object):
 
@@ -327,7 +327,7 @@ class Application(object):
                                    context['method'], context['call_id'])
 
     def __init__(self):
-        submod = get_service_name() or 'kb_vsearch'
+        submod = get_service_name() or 'kb_muscle'
         self.userlog = log.log(
             submod, ip_address=True, authuser=True, module=True, method=True,
             call_id=True, changecallback=self.logcallback,
@@ -338,14 +338,14 @@ class Application(object):
         self.serverlog.set_log_level(6)
         self.rpc_service = JSONRPCServiceCustom()
         self.method_authentication = dict()
-        self.rpc_service.add(impl_kb_vsearch.MUSCLE_nuc,
-                             name='kb_vsearch.MUSCLE_nuc',
+        self.rpc_service.add(impl_kb_muscle.MUSCLE_nuc,
+                             name='kb_muscle.MUSCLE_nuc',
                              types=[dict])
-        self.method_authentication['kb_vsearch.MUSCLE_nuc'] = 'required'
-        self.rpc_service.add(impl_kb_vsearch.MUSCLE_prot,
-                             name='kb_vsearch.MUSCLE_prot',
+        self.method_authentication['kb_muscle.MUSCLE_nuc'] = 'required'
+        self.rpc_service.add(impl_kb_muscle.MUSCLE_prot,
+                             name='kb_muscle.MUSCLE_prot',
                              types=[dict])
-        self.method_authentication['kb_vsearch.MUSCLE_prot'] = 'required'
+        self.method_authentication['kb_muscle.MUSCLE_prot'] = 'required'
         self.auth_client = biokbase.nexus.Client(
             config={'server': 'nexus.api.globusonline.org',
                     'verify_ssl': True,
@@ -399,7 +399,7 @@ class Application(object):
                         if token is None and auth_req == 'required':
                             err = ServerError()
                             err.data = "Authentication required for " + \
-                                "kb_vsearch but no authentication header was passed"
+                                "kb_muscle but no authentication header was passed"
                             raise err
                         elif token is None and auth_req == 'optional':
                             pass
