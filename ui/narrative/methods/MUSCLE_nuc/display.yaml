@@ -1,0 +1,44 @@
+#
+# define display information
+#
+name: MUSCLE nuc MSA
+tooltip: |
+    Build Multiple Sequence Alignment (MSA) for nucleotide sequences with MUSCLE
+screenshots: []
+
+icon: muscle-cyan.png
+
+#
+# define a set of similar methods that might be useful to the user
+#
+suggestions:
+    apps:
+        related:
+            []
+        next:
+            []
+    methods:
+        related:
+            []
+        next:
+            []
+
+#
+# Configure the display and description of parameters
+#
+parameters :
+    input_name:
+        ui-name : |
+            Input Features
+        short-hint : |
+            Features or DNA sequences.  Data types may be FeatureSet or SingleEndLibrary.
+    output_name:
+        ui-name : |
+            Output MSA
+        short-hint : |
+            Multiple Sequence Alignment output.
+
+description : |
+    <p>This method builds a Multiple Sequence Alignment (MSA) of nucleotide sequences with MUSCLE.</p>
+    <p>MUSCLE 3.6 from http://www.drive5.com/muscle/</p>
+
