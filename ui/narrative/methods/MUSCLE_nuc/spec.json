@@ -49,7 +49,7 @@
         {
             "id": "maxhours",
             "optional": false,
-            "advanced": false,
+            "advanced": true,
             "allow_multiple": false,
             "default_values": [ "0.5" ],
             "field_type": "text",
