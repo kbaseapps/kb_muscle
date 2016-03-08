@@ -33,6 +33,30 @@
                 "valid_ws_types": [ "KBaseTrees.MSA" ],
 		"is_output_name": true		  
             }
+        },
+        {
+            "id": "maxiters",
+            "optional": false,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "16" ],
+            "field_type": "text",
+            "text_options": {
+                "validate_as": "int",
+                "min_integer" : 1
+            }
+        },
+        {
+            "id": "maxhours",
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": [ "0.5" ],
+            "field_type": "text",
+            "text_options": {
+                "validate_as": "float",
+                "min_float" : 0.1
+            }
         }
     ],
     "behavior": {
@@ -52,6 +76,14 @@
                 {
                     "input_parameter": "output_name",
                     "target_property": "output_name"
+                },
+                {
+                    "input_parameter": "maxiters",
+                    "target_property": "maxiters"
+                },
+                {
+                    "input_parameter": "maxhours",
+                    "target_property": "maxhours"
                 }
             ],
             "output_mapping": [

@@ -37,6 +37,16 @@ parameters :
             Output MSA
         short-hint : |
             Multiple Sequence Alignment output.  Data type is MSA.
+    maxiters:
+        ui-name : |
+            Max Iterations
+        short-hint : |
+            Limit iterations even if not converged (default: 16)
+    maxhours:
+        ui-name : |
+            Max Hours
+        short-hint : |
+            Limit time MUSCLE will run (default: 30 min)
 
 description : |
     <p>This method builds a Multiple Sequence Alignment (MSA) of nucleotide sequences with MUSCLE.</p>
