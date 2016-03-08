@@ -36,12 +36,13 @@ WORKDIR /kb/module
 RUN make
 
 
-# Install MUSCLE 3.6
+# Install MUSCLE
 #
-WORKDIR /kb/module
-RUN curl http://drive5.com/muscle/downloads3.6/muscle3.6_linux_ia32.tar.gz > muscle3.6_linux_ia32.tar.gz
-RUN tar xfz muscle3.6_linux_ia32.tar.gz
-RUN ln -s muscle3.6 muscle
+RUN mkdir -p /kb/module/muscle/bin
+WORKDIR /kb/module/muscle/bin
+RUN curl http://drive5.com/muscle/muscle3.8.425_binaries.tar.gz > muscle3.8.425_binaries.tar.gz
+RUN tar xfz muscle3.8.425_binaries.tar.gz
+RUN ln -s muscle3.8.425_i86linux64 muscle
 
 
 WORKDIR /kb/module
