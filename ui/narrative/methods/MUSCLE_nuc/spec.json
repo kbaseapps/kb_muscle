@@ -81,6 +81,10 @@
                     "target_property": "workspace_name"
                 },
                 {
+                    "input_parameter": "desc",
+                    "target_property": "desc"
+                },
+                {
                     "input_parameter": "input_name",
                     "target_property": "input_name"
                 },
