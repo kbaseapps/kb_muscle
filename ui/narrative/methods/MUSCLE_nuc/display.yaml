@@ -32,8 +32,8 @@ parameters :
             MSA Description
         short-hint : |
             Describe Contents of the Output MSA
-	placeholder: |
-	    Enter Description
+        placeholder: |
+            Enter Description
     input_name:
         ui-name : |
             Input Features
