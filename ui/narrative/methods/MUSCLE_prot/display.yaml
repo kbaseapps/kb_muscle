@@ -27,6 +27,13 @@ suggestions:
 # Configure the display and description of parameters
 #
 parameters :
+    desc:
+        ui-name : |
+            MSA Description
+        short-hint : |
+            Describe Contents of the Output MSA
+        placeholder: |
+            Enter Description
     input_name:
         ui-name : |
             Input Features

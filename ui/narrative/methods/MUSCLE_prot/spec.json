@@ -12,6 +12,17 @@
     },
     "parameters": [ 
         {
+            "id": "desc",
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options": {
+                "is_output_name": true
+            }
+        },
+        {
             "id": "input_name",
             "optional": true,
             "advanced": false,
