@@ -602,6 +602,7 @@ class kb_muscle:
         # return the results
         return [returnVal]
 
+
     def MUSCLE_prot(self, ctx, params):
         # ctx is the context object
         # return variables are: returnVal
