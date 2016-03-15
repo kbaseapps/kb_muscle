@@ -25,6 +25,7 @@ module kb_muscle {
     */
     typedef structure {
         workspace_name workspace_name;
+	string         desc;
 	data_obj_name  input_name;
         data_obj_name  output_name;
 	int            maxiters;
