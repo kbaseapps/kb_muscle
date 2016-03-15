@@ -223,6 +223,376 @@ class kb_muscle:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN MUSCLE_nuc
+        console = []
+        self.log(console,'Running MUSCLE_nuc with params=')
+        self.log(console, "\n"+pformat(params))
+        report = ''
+#        report = 'Running MUSCLE_nuc with params='
+#        report += "\n"+pformat(params)
+
+
+        #### do some basic checks
+        #
+        if 'workspace_name' not in params:
+            raise ValueError('workspace_name parameter is required')
+        if 'input_name' not in params:
+            raise ValueError('input_name parameter is required')
+        if 'output_name' not in params:
+            raise ValueError('output_name parameter is required')
+
+
+        #### Get the input_name object
+        ##
+        input_forward_reads_file_compression = None
+        sequencing_tech = 'N/A'
+        try:
+            ws = workspaceService(self.workspaceURL, token=ctx['token'])
+            objects = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_name']}])
+            data = objects[0]['data']
+            info = objects[0]['info']
+            input_type_name = info[2].split('.')[1].split('-')[0]
+
+            if input_type_name == 'SingleEndLibrary':
+                input_type_namespace = info[2].split('.')[0]
+                if input_type_namespace == 'KBaseAssembly':
+                    file_name = data['handle']['file_name']
+                elif input_type_namespace == 'KBaseFile':
+                    file_name = data['lib']['file']['file_name']
+                else:
+                    raise ValueError('bad data type namespace: '+input_type_namespace)
+                #self.log(console, 'INPUT_FILENAME: '+file_name)  # DEBUG
+                if file_name[-3:] == ".gz":
+                    input_forward_reads_file_compression = 'gz'
+                if 'sequencing_tech' in data:
+                    sequencing_tech = data['sequencing_tech']
+
+        except Exception as e:
+            raise ValueError('Unable to fetch input_name object from workspace: ' + str(e))
+            #to get the full stack trace: traceback.format_exc()
+
+
+        # Handle overloading (input_name can be SingleEndLibrary or FeatureSet)
+        #
+        if input_type_name == 'SingleEndLibrary':
+
+            # DEBUG
+            #for k in data:
+            #    self.log(console,"SingleEndLibrary ["+k+"]: "+str(data[k]))
+
+            try:
+                if 'lib' in data:
+                    input_forward_reads = data['lib']['file']
+                elif 'handle' in data:
+                    input_forward_reads = data['handle']
+                else:
+                    self.log(console,"bad structure for 'input_forward_reads'")
+                    raise ValueError("bad structure for 'input_forward_reads'")
+
+                ### NOTE: this section is what could be replaced by the transform services
+                input_forward_reads_file_path = os.path.join(self.scratch,input_forward_reads['file_name'])
+                input_forward_reads_file_handle = open(input_forward_reads_file_path, 'w', 0)
+                self.log(console, 'downloading reads file: '+str(input_forward_reads_file_path))
+                headers = {'Authorization': 'OAuth '+ctx['token']}
+                r = requests.get(input_forward_reads['url']+'/node/'+input_forward_reads['id']+'?download', stream=True, headers=headers)
+                for chunk in r.iter_content(1024):
+                    input_forward_reads_file_handle.write(chunk)
+                input_forward_reads_file_handle.close();
+                self.log(console, 'done')
+                ### END NOTE
+
+
+                # remove carriage returns
+                new_file_path = input_forward_reads_file_path+"-CRfree"
+                new_file_handle = open(new_file_path, 'w', 0)
+                input_forward_reads_file_handle = open(input_forward_reads_file_path, 'r', 0)
+                for line in input_forward_reads_file_handle:
+                    line = re.sub("\r","",line)
+                    new_file_handle.write(line)
+                input_forward_reads_file_handle.close();
+                new_file_handle.close()
+                input_forward_reads_file_path = new_file_path
+
+                # convert FASTQ to FASTA (if necessary)
+                new_file_path = input_forward_reads_file_path+".fna"
+                new_file_handle = open(new_file_path, 'w', 0)
+                if input_forward_reads_file_compression == 'gz':
+                    input_forward_reads_file_handle = gzip.open(input_forward_reads_file_path, 'r', 0)
+                else:
+                    input_forward_reads_file_handle = open(input_forward_reads_file_path, 'r', 0)
+                header = None
+                last_header = None
+                last_seq_buf = None
+                last_line_was_header = False
+                was_fastq = False
+                for line in input_forward_reads_file_handle:
+                    if line.startswith('>'):
+                        break
+                    elif line.startswith('@'):
+                        was_fastq = True
+                        header = line[1:]
+                        if last_header != None:
+                            new_file_handle.write('>'+last_header)
+                            new_file_handle.write(last_seq_buf)
+                        last_seq_buf = None
+                        last_header = header
+                        last_line_was_header = True
+                    elif last_line_was_header:
+                        last_seq_buf = line
+                        last_line_was_header = False
+                    else:
+                        continue
+                if last_header != None:
+                    new_file_handle.write('>'+last_header)
+                    new_file_handle.write(last_seq_buf)
+
+                new_file_handle.close()
+                input_forward_reads_file_handle.close()
+                if was_fastq:
+                    input_forward_reads_file_path = new_file_path
+
+            except Exception as e:
+                print(traceback.format_exc())
+                raise ValueError('Unable to download single-end read library files: ' + str(e))
+
+        # FeatureSet
+        #
+        elif input_type_name == 'FeatureSet':
+            # retrieve sequences for features
+            input_featureSet = data
+
+            genome2Features = {}
+            features = input_featureSet['elements']
+            for fId in features.keys():
+                genomeRef = features[fId][0]
+                if genomeRef not in genome2Features:
+                    genome2Features[genomeRef] = []
+                genome2Features[genomeRef].append(fId)
+
+            # export features to FASTA file
+            input_forward_reads_file_path = os.path.join(self.scratch, params['input_name']+".fasta")
+            self.log(console, 'writing fasta file: '+input_forward_reads_file_path)
+            records = []
+            for genomeRef in genome2Features:
+                genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
+                these_genomeFeatureIds = genome2Features[genomeRef]
+                for feature in genome['features']:
+                    if feature['id'] in these_genomeFeatureIds:
+                        #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
+                        record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
+                        records.append(record)
+            SeqIO.write(records, input_forward_reads_file_path, "fasta")
+
+
+        # Missing proper input_input_type
+        #
+        else:
+            raise ValueError('Cannot yet handle input_name type of: '+type_name)            
+
+
+        ### Construct the command
+        #
+        #  e.g. muscle -in <fasta_in> -out <fasta_out> -maxiters <n> -haxours <h>
+        #
+        muscle_cmd = [self.MUSCLE_bin]
+
+        # check for necessary files
+        if not os.path.isfile(self.MUSCLE_bin):
+            raise ValueError("no such file '"+self.MUSCLE_bin+"'")
+        if not os.path.isfile(input_forward_reads_file_path):
+            raise ValueError("no such file '"+input_forward_reads_file_path+"'")
+
+        # set the output path
+        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
+        output_dir = os.path.join(self.scratch,'output.'+str(timestamp))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        output_aln_file_path = os.path.join(output_dir, params['input_name']+'-MSA.fasta');
+        file_extension = ''
+
+        muscle_cmd.append('-in')
+        muscle_cmd.append(input_forward_reads_file_path)
+        muscle_cmd.append('-out')
+        muscle_cmd.append(output_aln_file_path)
+        muscle_cmd.append('--alnout')
+        muscle_cmd.append(output_aln_file_path)
+
+        # options
+        if 'maxiters' in params and params['maxiters'] != None:
+            muscle_cmd.append('-maxiters')
+            muscle_cmd.append(str(params['maxiters']))
+        if 'maxhours' in params and params['maxhours'] != None:
+            muscle_cmd.append('-maxhours')
+            muscle_cmd.append(str(params['maxhours']))
+
+
+        # Run MUSCLE, capture output as it happens
+        #
+        self.log(console, 'RUNNING MUSCLE:')
+        self.log(console, '    '+' '.join(muscle_cmd))
+#        report += "\n"+'running MUSCLE:'+"\n"
+#        report += '    '+' '.join(muscle_cmd)+"\n"
+
+        p = subprocess.Popen(muscle_cmd, \
+                             cwd = self.scratch, \
+                             stdout = subprocess.PIPE, \
+                             stderr = subprocess.STDOUT, \
+                             shell = False)
+
+        while True:
+            line = p.stdout.readline()
+            if not line: break
+            self.log(console, line.replace('\n', ''))
+
+        p.stdout.close()
+        p.wait()
+        self.log(console, 'return code: ' + str(p.returncode))
+        if p.returncode != 0:
+            raise ValueError('Error running vsearch, return code: '+str(p.returncode) + 
+                '\n\n'+ '\n'.join(console))
+
+
+        # Parse the FASTA MSA output
+        #
+        self.log(console, 'PARSING MUSCLE MSA FASTA OUTPUT')
+        output_aln_file_handle = open (output_aln_file_path, "r", 0)
+
+        row_order = []
+        alignment = {}
+        alignment_length = None
+
+        last_header = None
+        header = None
+        last_seq = ''
+        for line in output_aln_file_handle:
+            if line.startswith('>'):
+                header = line[1:]
+                row_order.append(header)
+
+                if last_header != None:
+                    self.log(console,"ID: '"+last_header+"'\nALN: '"+line+"'")  # DEBUG
+                    alignment[last_header] = last_seq
+                    if alignment_length = None:
+                        alignment_length = len(last_seq)
+                    elif alignment_length != len(last_seq):
+                        raise ValueError ("unequal alignment row for "+last_header+": '"+last_seq+"'")
+                last_header = header
+                last_seq = ''
+            else:
+                last_seq += line
+        if last_header != None:
+            self.log(console,"ID: '"+last_header+"'\nALN: '"+line+"'")  # DEBUG
+            alignment[last_header] = last_seq
+            if alignment_length = None:
+                alignment_length = len(last_seq)
+            elif alignment_length != len(last_seq):
+                raise ValueError ("unequal alignment row for "+last_header+": '"+last_seq+"'")
+        
+        output_aln_file_handle.close()
+
+
+        # load the method provenance from the context object
+        #
+        self.log(console,"SETTING PROVENANCE")  # DEBUG
+        provenance = [{}]
+        if 'provenance' in ctx:
+            provenance = ctx['provenance']
+        # add additional info to provenance here, in this case the input data object reference
+        provenance[0]['input_ws_objects'] = []
+        provenance[0]['input_ws_objects'].append(params['workspace_name']+'/'+params['input_name'])
+        provenance[0]['service'] = 'kb_muscle'
+        provenance[0]['method'] = 'MUSCLE_nuc'
+
+
+        # Upload results
+        #
+        self.log(console,"UPLOADING RESULTS")  # DEBUG
+
+        MSA_name = params['output_name']
+        MSA_description = params['desc']
+        sequence_type = 'dna'
+        ws_refs = None  # may add these later from FeatureSet
+        kb_refs = None
+        #alignment_length  # already have
+        #row_order  # already have
+        #alignment  # already have
+        # NO trim_info
+        # NO alignment_attributes
+        # NO default_row_labels
+        # NO parent_msa_ref
+
+        
+#        if input_type_name == 'FeatureSet':
+#            features = featureSet['elements']
+#            genome2Features = {}
+#            for fId in row_order:
+#                genomeRef = features[fId][0]
+#                if genomeRef not in genome2Features:
+#                    genome2Features[genomeRef] = []
+#                genome2Features[genomeRef].append(fId)
+#
+#            for genomeRef in genome2Features:
+#                genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
+#                these_genomeFeatureIds = genome2Features[genomeRef]
+#                for feature in genome['features']:
+#                    if feature['id'] in these_genomeFeatureIds:
+
+
+        output_MSA = {
+                      'name': MSA_name,
+                      'description': MSA_description,
+                      'sequence_type': sequence_type,
+                      'alignment_length': alignment_length,
+                      'row_order': row_order,
+                      'alignment': alignment
+                     }
+
+        new_obj_info = ws.save_objects({
+                            'workspace': params['workspace_name'],
+                            'objects':[{
+                                    'type': 'KBaseTrees.MSA',
+                                    'data': output_MSA,
+                                    'name': params['output_name'],
+                                    'meta': {},
+                                    'provenance': provenance
+                                }]
+                        })
+
+
+        # build output report object
+        #
+        self.log(console,"BUILDING REPORT")  # DEBUG
+#        self.log(console,"sequences in many set: "+str(seq_total))
+#        self.log(console,"sequences in hit set:  "+str(hit_total))
+#        report += 'sequences in many set: '+str(seq_total)+"\n"
+#        report += 'sequences in hit set:  '+str(hit_total)+"\n"
+
+        reportObj = {
+            'objects_created':[{'ref':params['workspace_name']+'/'+params['output_name'], 'description':'MUSCLE_nuc MSA'}],
+            'text_message':report
+        }
+        reportName = 'muscle_report_'+str(hex(uuid.getnode()))
+        report_obj_info = ws.save_objects({
+#                'id':info[6],
+                'workspace':params['workspace_name'],
+                'objects':[
+                    {
+                        'type':'KBaseReport.Report',
+                        'data':reportObj,
+                        'name':reportName,
+                        'meta':{},
+                        'hidden':1,
+                        'provenance':provenance
+                    }
+                ]
+            })[0]
+
+
+        self.log(console,"BUILDING RETURN OBJECT")
+        returnVal = { 'report_name': reportName,
+                      'report_ref': str(report_obj_info[6]) + '/' + str(report_obj_info[0]) + '/' + str(report_obj_info[4]),
+                      }
+        self.log(console,"MUSCLE_nuc DONE")
+
         #END MUSCLE_nuc
 
         # At some point might do deeper type checking...
@@ -231,6 +601,7 @@ class kb_muscle:
                              'returnVal is not type dict as required.')
         # return the results
         return [returnVal]
+
 
     def MUSCLE_prot(self, ctx, params):
         # ctx is the context object
