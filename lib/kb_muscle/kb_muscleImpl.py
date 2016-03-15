@@ -471,7 +471,7 @@ class kb_muscle:
                 if last_header != None:
                     self.log(console,"ID: '"+last_header+"'\nALN: '"+line+"'")  # DEBUG
                     alignment[last_header] = last_seq
-                    if alignment_length = None:
+                    if alignment_length == None:
                         alignment_length = len(last_seq)
                     elif alignment_length != len(last_seq):
                         raise ValueError ("unequal alignment row for "+last_header+": '"+last_seq+"'")
@@ -482,7 +482,7 @@ class kb_muscle:
         if last_header != None:
             self.log(console,"ID: '"+last_header+"'\nALN: '"+line+"'")  # DEBUG
             alignment[last_header] = last_seq
-            if alignment_length = None:
+            if alignment_length == None:
                 alignment_length = len(last_seq)
             elif alignment_length != len(last_seq):
                 raise ValueError ("unequal alignment row for "+last_header+": '"+last_seq+"'")
