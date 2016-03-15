@@ -14,7 +14,7 @@ RUN \
   rm -rf transform && \ 
   git clone https://github.com/kbase/transform -b develop
 
- setup the transform, but ignore errors because sample data cannot be found!
+# setup the transform, but ignore errors because sample data cannot be found!
 RUN \
   . /kb/dev_container/user-env.sh; \
   cd /kb/dev_container/modules/transform/t/demo; \
