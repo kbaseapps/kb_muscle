@@ -127,9 +127,10 @@ $params is a kb_muscle.MUSCLE_Params
 $return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
+	desc has a value which is a string
 	input_name has a value which is a kb_muscle.data_obj_name
 	output_name has a value which is a kb_muscle.data_obj_name
-	maxiters has a value which is a float
+	maxiters has a value which is an int
 	maxhours has a value which is a float
 workspace_name is a string
 data_obj_name is a string
@@ -148,9 +149,10 @@ $params is a kb_muscle.MUSCLE_Params
 $return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
+	desc has a value which is a string
 	input_name has a value which is a kb_muscle.data_obj_name
 	output_name has a value which is a kb_muscle.data_obj_name
-	maxiters has a value which is a float
+	maxiters has a value which is an int
 	maxhours has a value which is a float
 workspace_name is a string
 data_obj_name is a string
@@ -236,9 +238,10 @@ $params is a kb_muscle.MUSCLE_Params
 $return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
+	desc has a value which is a string
 	input_name has a value which is a kb_muscle.data_obj_name
 	output_name has a value which is a kb_muscle.data_obj_name
-	maxiters has a value which is a float
+	maxiters has a value which is an int
 	maxhours has a value which is a float
 workspace_name is a string
 data_obj_name is a string
@@ -257,9 +260,10 @@ $params is a kb_muscle.MUSCLE_Params
 $return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
+	desc has a value which is a string
 	input_name has a value which is a kb_muscle.data_obj_name
 	output_name has a value which is a kb_muscle.data_obj_name
-	maxiters has a value which is a float
+	maxiters has a value which is an int
 	maxhours has a value which is a float
 workspace_name is a string
 data_obj_name is a string
@@ -490,9 +494,10 @@ MUSCLE Input Params
 <pre>
 a reference to a hash where the following keys are defined:
 workspace_name has a value which is a kb_muscle.workspace_name
+desc has a value which is a string
 input_name has a value which is a kb_muscle.data_obj_name
 output_name has a value which is a kb_muscle.data_obj_name
-maxiters has a value which is a float
+maxiters has a value which is an int
 maxhours has a value which is a float
 
 </pre>
@@ -503,9 +508,10 @@ maxhours has a value which is a float
 
 a reference to a hash where the following keys are defined:
 workspace_name has a value which is a kb_muscle.workspace_name
+desc has a value which is a string
 input_name has a value which is a kb_muscle.data_obj_name
 output_name has a value which is a kb_muscle.data_obj_name
-maxiters has a value which is a float
+maxiters has a value which is an int
 maxhours has a value which is a float
 
 
