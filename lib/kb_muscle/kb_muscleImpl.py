@@ -413,8 +413,6 @@ class kb_muscle:
         muscle_cmd.append(input_forward_reads_file_path)
         muscle_cmd.append('-out')
         muscle_cmd.append(output_aln_file_path)
-        muscle_cmd.append('--alnout')
-        muscle_cmd.append(output_aln_file_path)
 
         # options
         if 'maxiters' in params and params['maxiters'] != None:
