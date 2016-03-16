@@ -764,6 +764,7 @@ class kb_muscle:
             input_forward_reads_file_path = os.path.join(self.scratch, params['input_name']+".fasta")
             self.log(console, 'writing fasta file: '+input_forward_reads_file_path)
             records = []
+            proteins_found = 0
             for genomeRef in genome2Features:
                 genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
                 these_genomeFeatureIds = genome2Features[genomeRef]
@@ -771,10 +772,19 @@ class kb_muscle:
                     if feature['id'] in these_genomeFeatureIds:
                         #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                         #record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
-                        record = SeqRecord(Seq(feature['protein_translation']), id=feature['id'], description=genome['id'])
-                        records.append(record)
-            SeqIO.write(records, input_forward_reads_file_path, "fasta")
+                        if 'protein_translation' in feature and feature['protein_translation'] != None:
+                            record = SeqRecord(Seq(feature['protein_translation']), id=feature['id'], description=genome['id'])
+                            proteins_found += 1
+                        else:
+                            raise ValueError ("bad Feature "+feature['id']+": no protein_translation found")
+                            self.log(console,"bad Feature "+feature['id']+": no protein_translation found")
 
+                        records.append(record)
+            if proteins_found < 2:
+                raise ValueError ("Less than 2 protein Features (CDS) found.  exiting...")
+                sys.exit(0)
+            else:
+                SeqIO.write(records, input_forward_reads_file_path, "fasta")
 
         # Missing proper input_input_type
         #
