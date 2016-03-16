@@ -463,6 +463,7 @@ class kb_muscle:
         last_seq = ''
         leading_chars_pattern = re.compile("^\S+")
         for line in output_aln_file_handle:
+            line.rstrip('\n')
             if line.startswith('>'):
                 header = line[1:]
                 row_order.append(header)
