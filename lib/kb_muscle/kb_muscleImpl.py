@@ -471,6 +471,7 @@ class kb_muscle:
                 if last_header != None:
                     last_id = leading_chars_pattern.findall(last_header)[0]
                     self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
+                    report += last_id+"\t"+last_seq+"\n"
                     alignment[last_header] = last_seq
                     if alignment_length == None:
                         alignment_length = len(last_seq)
@@ -483,6 +484,7 @@ class kb_muscle:
         if last_header != None:
             last_id = leading_chars_pattern.findall(last_header)[0]
             self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
+            report += last_id+"\t"+last_seq+"\n"
             alignment[last_header] = last_seq
             if alignment_length == None:
                 alignment_length = len(last_seq)
