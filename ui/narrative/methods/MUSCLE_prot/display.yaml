@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: MUSCLE prot MSA
+name: Multiple Sequence Alignment - MUSCLE prot
 tooltip: |
     Build Multiple Sequence Alignment (MSA) for protein sequences with MUSCLE
 screenshots: []
