@@ -461,13 +461,15 @@ class kb_muscle:
         last_header = None
         header = None
         last_seq = ''
+        leading_chars_pattern = re.compile("^\S+")
         for line in output_aln_file_handle:
             if line.startswith('>'):
                 header = line[1:]
                 row_order.append(header)
 
                 if last_header != None:
-                    self.log(console,"ID: '"+last_header+"'\nALN: '"+line+"'")  # DEBUG
+                    last_id = leading_chars_pattern.findall(last_header)[0]
+                    self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
                     alignment[last_header] = last_seq
                     if alignment_length == None:
                         alignment_length = len(last_seq)
@@ -478,7 +480,8 @@ class kb_muscle:
             else:
                 last_seq += line
         if last_header != None:
-            self.log(console,"ID: '"+last_header+"'\nALN: '"+line+"'")  # DEBUG
+            last_id = leading_chars_pattern.findall(last_header)[0]
+            self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
             alignment[last_header] = last_seq
             if alignment_length == None:
                 alignment_length = len(last_seq)
