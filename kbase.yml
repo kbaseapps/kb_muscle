@@ -2,7 +2,7 @@ module-name:
     kb_muscle
 
 module-description:
-    A KBase module
+    MUSCLE Multiple Sequence Alignments (MSA)
 
 service-language:
     python
