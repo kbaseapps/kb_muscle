@@ -38,7 +38,7 @@ parameters :
         ui-name : |
             Input Features
         short-hint : |
-            Features or PROTEIN sequences.  Data type is FeatureSet.
+            Features that code for PROTEIN sequences.  Data type is FeatureSet.
     output_name:
         ui-name : |
             Output MSA
