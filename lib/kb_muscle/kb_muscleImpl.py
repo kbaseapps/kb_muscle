@@ -662,7 +662,7 @@ class kb_muscle:
 
         # Handle overloading (input_name can be SingleEndLibrary or FeatureSet)
         #
-"""
+        """
         if input_type_name == 'SingleEndLibrary':
 
             # DEBUG
@@ -743,7 +743,7 @@ class kb_muscle:
             except Exception as e:
                 print(traceback.format_exc())
                 raise ValueError('Unable to download single-end read library files: ' + str(e))
-"""
+        """
 
         # FeatureSet
         #
