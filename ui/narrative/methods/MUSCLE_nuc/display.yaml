@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: MUSCLE nuc MSA
+name: Multiple Sequence Alignment - MUSCLE nuc
 tooltip: |
     Build Multiple Sequence Alignment (MSA) for nucleotide sequences with MUSCLE
 screenshots: []
