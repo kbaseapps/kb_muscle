@@ -267,8 +267,8 @@ class kb_muscle:
                     sequencing_tech = data['sequencing_tech']
 
         except Exception as e:
+            traceback.format_exc()
             raise ValueError('Unable to fetch input_name object from workspace: ' + str(e))
-            #to get the full stack trace: traceback.format_exc()
 
 
         # Handle overloading (input_name can be SingleEndLibrary or FeatureSet)
@@ -398,13 +398,10 @@ class kb_muscle:
         # check for necessary files
         if not os.path.isfile(self.MUSCLE_bin):
             raise ValueError("no such file '"+self.MUSCLE_bin+"'")
-            sys.exit(0)
         if not os.path.isfile(input_forward_reads_file_path):
             raise ValueError("no such file '"+input_forward_reads_file_path+"'")
-            sys.exit(0)
         elif not os.path.getsize(input_forward_reads_file_path) > 0:
             raise ValueError("empty file '"+input_forward_reads_file_path+"'")
-            sys.exit(0)
 
         # set the output path
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
@@ -457,6 +454,10 @@ class kb_muscle:
         # Parse the FASTA MSA output
         #
         self.log(console, 'PARSING MUSCLE MSA FASTA OUTPUT')
+        if not os.path.isfile(output_aln_file_path):
+            raise ValueError("failed to create MUSCLE output: "+output_aln_file_path)
+        elif not os.path.getsize(output_aln_file_path) > 0:
+            raise ValueError("created empty file for MUSCLE output: "+output_aln_file_path)
         output_aln_file_handle = open (output_aln_file_path, "r", 0)
 
         row_order = []
@@ -659,8 +660,8 @@ class kb_muscle:
 #                    sequencing_tech = data['sequencing_tech']
 
         except Exception as e:
+            traceback.format_exc()
             raise ValueError('Unable to fetch input_name object from workspace: ' + str(e))
-            #to get the full stack trace: traceback.format_exc()
 
 
         # Handle overloading (input_name can be SingleEndLibrary or FeatureSet)
@@ -809,10 +810,8 @@ class kb_muscle:
             raise ValueError("no such file '"+self.MUSCLE_bin+"'")
         if not os.path.isfile(input_forward_reads_file_path):
             raise ValueError("no such file '"+input_forward_reads_file_path+"'")
-            sys.exit(0)
         elif not os.path.getsize(input_forward_reads_file_path) > 0:
             raise ValueError("empty file '"+input_forward_reads_file_path+"'.  May have not provided any protein coding genes?")
-            sys.exit(0)
 
         # set the output path
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
@@ -865,6 +864,10 @@ class kb_muscle:
         # Parse the FASTA MSA output
         #
         self.log(console, 'PARSING MUSCLE MSA FASTA OUTPUT')
+        if not os.path.isfile(output_aln_file_path):
+            raise ValueError("failed to create MUSCLE output: "+output_aln_file_path)
+        elif not os.path.getsize(output_aln_file_path) > 0:
+            raise ValueError("created empty file for MUSCLE output: "+output_aln_file_path)
         output_aln_file_handle = open (output_aln_file_path, "r", 0)
 
         row_order = []
