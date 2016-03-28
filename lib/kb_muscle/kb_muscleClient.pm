@@ -28,7 +28,7 @@ kb_muscle::kb_muscleClient
 
 ** A KBase module: kb_muscle
 **
-** This module runs MUSCLE to make MSAs of either DNA or PROTEIN sequences
+** This module runs MUSCLE to make MSAs of either DNA or PROTEIN sequences.  "MUSCLE nuc" will build nucleotide alignments, even for protein coding genes.  "MUSCLE prot" will build protein sequence alignments, and will ignore any features that do not code for proteins.
 **
 
 
