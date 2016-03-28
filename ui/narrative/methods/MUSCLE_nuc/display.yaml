@@ -3,7 +3,7 @@
 #
 name: Multiple Sequence Alignment - MUSCLE nuc
 tooltip: |
-    Build Multiple Sequence Alignment (MSA) for nucleotide sequences with MUSCLE
+    Build Multiple Sequence Alignment (MSA) for nucleotide sequences with MUSCLE.  DNA gene sequences (not translated protein sequences) will be used even for Protein Coding Genes.
 screenshots: []
 
 icon: muscle-cyan.png
