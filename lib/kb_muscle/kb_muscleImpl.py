@@ -398,8 +398,13 @@ class kb_muscle:
         # check for necessary files
         if not os.path.isfile(self.MUSCLE_bin):
             raise ValueError("no such file '"+self.MUSCLE_bin+"'")
+            sys.exit(0)
         if not os.path.isfile(input_forward_reads_file_path):
             raise ValueError("no such file '"+input_forward_reads_file_path+"'")
+            sys.exit(0)
+        elif not os.path.getsize(input_forward_reads_file_path) > 0:
+            raise ValueError("empty file '"+input_forward_reads_file_path+"'")
+            sys.exit(0)
 
         # set the output path
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
@@ -804,6 +809,10 @@ class kb_muscle:
             raise ValueError("no such file '"+self.MUSCLE_bin+"'")
         if not os.path.isfile(input_forward_reads_file_path):
             raise ValueError("no such file '"+input_forward_reads_file_path+"'")
+            sys.exit(0)
+        elif not os.path.getsize(input_forward_reads_file_path) > 0:
+            raise ValueError("empty file '"+input_forward_reads_file_path+"'.  May have not provided any protein coding genes?")
+            sys.exit(0)
 
         # set the output path
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
