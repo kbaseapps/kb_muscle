@@ -777,15 +777,15 @@ class kb_muscle:
                         #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                         #record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
                         if feature['type'] != 'CDS'
-                            raise ValueError ("attempt to include non-CDS Feature "+feature['id'])
                             self.log(console,"attempt to include non-CDS Feature "+feature['id'])
-                        elif 'protein_translation' in feature and feature['protein_translation'] != None:
+                            raise ValueError ("attempt to include non-CDS Feature "+feature['id'])
+                        elif 'protein_translation' not in feature or feature['protein_translation'] == None:
+                            self.log(console,"bad CDS Feature "+feature['id']+": no protein_translation found")
+                            raise ValueError ("bad CDS Feature "+feature['id']+": no protein_translation found")
+                        else:
                             record = SeqRecord(Seq(feature['protein_translation']), id=feature['id'], description=genome['id'])
                             proteins_found += 1
                             records.append(record)
-                        else:
-                            raise ValueError ("bad CDS Feature "+feature['id']+": no protein_translation found")
-                            self.log(console,"bad CDS Feature "+feature['id']+": no protein_translation found")
 
             if proteins_found < 2:
                 raise ValueError ("Less than 2 protein Features (CDS) found.  exiting...")
