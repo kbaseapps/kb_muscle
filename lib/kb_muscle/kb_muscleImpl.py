@@ -776,11 +776,11 @@ class kb_muscle:
                         elif 'protein_translation' in feature and feature['protein_translation'] != None:
                             record = SeqRecord(Seq(feature['protein_translation']), id=feature['id'], description=genome['id'])
                             proteins_found += 1
+                            records.append(record)
                         else:
                             raise ValueError ("bad CDS Feature "+feature['id']+": no protein_translation found")
                             self.log(console,"bad CDS Feature "+feature['id']+": no protein_translation found")
 
-                        records.append(record)
             if proteins_found < 2:
                 raise ValueError ("Less than 2 protein Features (CDS) found.  exiting...")
                 sys.exit(0)
