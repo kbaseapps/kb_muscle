@@ -472,10 +472,10 @@ class kb_muscle:
             line = line.rstrip('\n')
             if line.startswith('>'):
                 header = line[1:]
-                row_order.append(header)
 
                 if last_header != None:
                     last_id = leading_chars_pattern.findall(last_header)[0]
+                    row_order.append(last_id)
                     #self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
                     report += last_id+"\t"+last_seq+"\n"
                     alignment[last_id] = last_seq
@@ -489,6 +489,7 @@ class kb_muscle:
                 last_seq += line
         if last_header != None:
             last_id = leading_chars_pattern.findall(last_header)[0]
+            row_order.append(last_id)
             #self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
             report += last_id+"\t"+last_seq+"\n"
             alignment[last_id] = last_seq
@@ -882,10 +883,10 @@ class kb_muscle:
             line = line.rstrip('\n')
             if line.startswith('>'):
                 header = line[1:]
-                row_order.append(header)
 
                 if last_header != None:
                     last_id = leading_chars_pattern.findall(last_header)[0]
+                    row_order.append(last_id)
                     #self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
                     report += last_id+"\t"+last_seq+"\n"
                     alignment[last_id] = last_seq
@@ -899,6 +900,7 @@ class kb_muscle:
                 last_seq += line
         if last_header != None:
             last_id = leading_chars_pattern.findall(last_header)[0]
+            row_order.append(last_id)
             #self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
             report += last_id+"\t"+last_seq+"\n"
             alignment[last_id] = last_seq
