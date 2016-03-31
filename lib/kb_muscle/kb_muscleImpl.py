@@ -777,7 +777,7 @@ class kb_muscle:
                     if feature['id'] in these_genomeFeatureIds:
                         #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                         #record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
-                        if feature['type'] != 'CDS'
+                        if feature['type'] != 'CDS':
                             self.log(console,"attempt to include non-CDS Feature "+feature['id'])
                             raise ValueError ("attempt to include non-CDS Feature "+feature['id'])
                         elif 'protein_translation' not in feature or feature['protein_translation'] == None:
