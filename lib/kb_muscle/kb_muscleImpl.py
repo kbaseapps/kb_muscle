@@ -57,6 +57,14 @@ class kb_muscle:
         print(message)
         sys.stdout.flush()
 
+    # target is a list for collecting log messages pertaining to failed validation tests
+    def invalid_log(self, target, message):
+        # we should do something better here...
+        if target is not None:
+            target.append(message)
+        #print(message)
+        #sys.stdout.flush()
+
     def get_single_end_read_library(self, ws_data, ws_info, forward):
         pass
 
@@ -224,6 +232,7 @@ class kb_muscle:
         # return variables are: returnVal
         #BEGIN MUSCLE_nuc
         console = []
+        invalid_msgs = []
         self.log(console,'Running MUSCLE_nuc with params=')
         self.log(console, "\n"+pformat(params))
         report = ''
@@ -386,7 +395,7 @@ class kb_muscle:
         # Missing proper input_input_type
         #
         else:
-            raise ValueError('Cannot yet handle input_name type of: '+type_name)            
+            raise ValueError('Cannot yet handle input_name type of: '+type_name)
 
 
         ### Construct the command
@@ -516,39 +525,38 @@ class kb_muscle:
 
         # Upload results
         #
-        self.log(console,"UPLOADING RESULTS")  # DEBUG
+        if len(invalid_msgs) == 0:
+            self.log(console,"UPLOADING RESULTS")  # DEBUG
 
-        MSA_name = params['output_name']
-        MSA_description = params['desc']
-        sequence_type = 'dna'
-        ws_refs = None  # may add these later from FeatureSet
-        kb_refs = None
-        #alignment_length  # already have
-        #row_order  # already have
-        #alignment  # already have
-        # NO trim_info
-        # NO alignment_attributes
-        # NO default_row_labels
-        # NO parent_msa_ref
+            MSA_name = params['output_name']
+            MSA_description = params['desc']
+            sequence_type = 'dna'
+            ws_refs = None  # may add these later from FeatureSet
+            kb_refs = None
+            #alignment_length  # already have
+            #row_order  # already have
+            #alignment  # already have
+            # NO trim_info
+            # NO alignment_attributes
+            # NO default_row_labels
+            # NO parent_msa_ref
 
-        
-#        if input_type_name == 'FeatureSet':
-#            features = featureSet['elements']
-#            genome2Features = {}
-#            for fId in row_order:
-#                genomeRef = features[fId][0]
-#                if genomeRef not in genome2Features:
-#                    genome2Features[genomeRef] = []
-#                genome2Features[genomeRef].append(fId)
+#            if input_type_name == 'FeatureSet':
+#                features = featureSet['elements']
+#                genome2Features = {}
+#                for fId in row_order:
+#                    genomeRef = features[fId][0]
+#                    if genomeRef not in genome2Features:
+#                        genome2Features[genomeRef] = []
+#                    genome2Features[genomeRef].append(fId)
 #
-#            for genomeRef in genome2Features:
-#                genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
-#                these_genomeFeatureIds = genome2Features[genomeRef]
-#                for feature in genome['features']:
-#                    if feature['id'] in these_genomeFeatureIds:
+#                for genomeRef in genome2Features:
+#                    genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
+#                    these_genomeFeatureIds = genome2Features[genomeRef]
+#                    for feature in genome['features']:
+#                        if feature['id'] in these_genomeFeatureIds:
 
-
-        output_MSA = {
+            output_MSA = {
                       'name': MSA_name,
                       'description': MSA_description,
                       'sequence_type': sequence_type,
@@ -557,7 +565,7 @@ class kb_muscle:
                       'alignment': alignment
                      }
 
-        new_obj_info = ws.save_objects({
+            new_obj_info = ws.save_objects({
                             'workspace': params['workspace_name'],
                             'objects':[{
                                     'type': 'KBaseTrees.MSA',
@@ -572,16 +580,25 @@ class kb_muscle:
         # build output report object
         #
         self.log(console,"BUILDING REPORT")  # DEBUG
-#        self.log(console,"sequences in many set: "+str(seq_total))
-#        self.log(console,"sequences in hit set:  "+str(hit_total))
-#        report += 'sequences in many set: '+str(seq_total)+"\n"
-#        report += 'sequences in hit set:  '+str(hit_total)+"\n"
+        if len(invalid_msgs) == 0:
+#            self.log(console,"sequences in many set: "+str(seq_total))
+#            self.log(console,"sequences in hit set:  "+str(hit_total))
+#            report += 'sequences in many set: '+str(seq_total)+"\n"
+#            report += 'sequences in hit set:  '+str(hit_total)+"\n"
 
-        reportObj = {
-            'objects_created':[{'ref':params['workspace_name']+'/'+params['output_name'], 'description':'MUSCLE_nuc MSA'}],
-            'text_message':report
-        }
+            reportObj = {
+                'objects_created':[{'ref':params['workspace_name']+'/'+params['output_name'], 'description':'MUSCLE_nuc MSA'}],
+                'text_message':report
+                }
+        else:
+            reportObj = {
+                report += "FAILURE:\n\n"+"\n".join(invalid_msgs)+"\n"
+                'objects_created':[],
+                'text_message':report
+                }
+
         reportName = 'muscle_report_'+str(hex(uuid.getnode()))
+        ws = workspaceService(self.workspaceURL, token=ctx['token'])
         report_obj_info = ws.save_objects({
 #                'id':info[6],
                 'workspace':params['workspace_name'],
@@ -613,11 +630,13 @@ class kb_muscle:
         # return the results
         return [returnVal]
 
+
     def MUSCLE_prot(self, ctx, params):
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN MUSCLE_prot
         console = []
+        invalid_msgs = []
         self.log(console,'Running MUSCLE_prot with params=')
         self.log(console, "\n"+pformat(params))
         report = ''
@@ -779,137 +798,139 @@ class kb_muscle:
                         #record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
                         if feature['type'] != 'CDS':
                             self.log(console,"attempt to include non-CDS Feature "+feature['id'])
-                            raise ValueError ("attempt to include non-CDS Feature "+feature['id'])
+                            self.invalid_log(invalid_msgs,"attempt to include non-CDS Feature "+feature['id'])
+                            continue
                         elif 'protein_translation' not in feature or feature['protein_translation'] == None:
                             self.log(console,"bad CDS Feature "+feature['id']+": no protein_translation found")
-                            raise ValueError ("bad CDS Feature "+feature['id']+": no protein_translation found")
+                            self.invalid_log(invalid_msgs,"bad CDS Feature "+feature['id']+": no protein_translation found")
+                            continue
                         else:
                             record = SeqRecord(Seq(feature['protein_translation']), id=feature['id'], description=genome['id'])
                             proteins_found += 1
                             records.append(record)
 
             if proteins_found < 2:
-                raise ValueError ("Less than 2 protein Features (CDS) found.  exiting...")
-                sys.exit(0)
+                self.invalid_log(invalid_msgs,"Less than 2 protein Features (CDS) found.  exiting...")
             else:
                 SeqIO.write(records, input_forward_reads_file_path, "fasta")
 
         # Missing proper input_input_type
         #
         else:
-            raise ValueError('Cannot yet handle input_name type of: '+type_name)            
+            raise ValueError('Cannot yet handle input_name type of: '+type_name)
 
 
         ### Construct the command
         #
         #  e.g. muscle -in <fasta_in> -out <fasta_out> -maxiters <n> -haxours <h>
         #
-        muscle_cmd = [self.MUSCLE_bin]
+        if len(invalid_msgs) == 0:
+            muscle_cmd = [self.MUSCLE_bin]
 
-        # check for necessary files
-        if not os.path.isfile(self.MUSCLE_bin):
-            raise ValueError("no such file '"+self.MUSCLE_bin+"'")
-        if not os.path.isfile(input_forward_reads_file_path):
-            raise ValueError("no such file '"+input_forward_reads_file_path+"'")
-        elif not os.path.getsize(input_forward_reads_file_path) > 0:
-            raise ValueError("empty file '"+input_forward_reads_file_path+"'.  May have not provided any protein coding genes?")
+            # check for necessary files
+            if not os.path.isfile(self.MUSCLE_bin):
+                raise ValueError("no such file '"+self.MUSCLE_bin+"'")
+            if not os.path.isfile(input_forward_reads_file_path):
+                raise ValueError("no such file '"+input_forward_reads_file_path+"'")
+            elif not os.path.getsize(input_forward_reads_file_path) > 0:
+                raise ValueError("empty file '"+input_forward_reads_file_path+"'.  May have not provided any protein coding genes?")
 
-        # set the output path
-        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
-        output_dir = os.path.join(self.scratch,'output.'+str(timestamp))
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        output_aln_file_path = os.path.join(output_dir, params['input_name']+'-MSA.fasta');
-        file_extension = ''
+            # set the output path
+            timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
+            output_dir = os.path.join(self.scratch,'output.'+str(timestamp))
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            output_aln_file_path = os.path.join(output_dir, params['input_name']+'-MSA.fasta');
+            file_extension = ''
 
-        muscle_cmd.append('-in')
-        muscle_cmd.append(input_forward_reads_file_path)
-        muscle_cmd.append('-out')
-        muscle_cmd.append(output_aln_file_path)
+            muscle_cmd.append('-in')
+            muscle_cmd.append(input_forward_reads_file_path)
+            muscle_cmd.append('-out')
+            muscle_cmd.append(output_aln_file_path)
 
-        # options
-        if 'maxiters' in params and params['maxiters'] != None:
-            muscle_cmd.append('-maxiters')
-            muscle_cmd.append(str(params['maxiters']))
-        if 'maxhours' in params and params['maxhours'] != None:
-            muscle_cmd.append('-maxhours')
-            muscle_cmd.append(str(params['maxhours']))
+            # options
+            if 'maxiters' in params and params['maxiters'] != None:
+                muscle_cmd.append('-maxiters')
+                muscle_cmd.append(str(params['maxiters']))
+            if 'maxhours' in params and params['maxhours'] != None:
+                muscle_cmd.append('-maxhours')
+                muscle_cmd.append(str(params['maxhours']))
 
 
-        # Run MUSCLE, capture output as it happens
-        #
-        self.log(console, 'RUNNING MUSCLE:')
-        self.log(console, '    '+' '.join(muscle_cmd))
-#        report += "\n"+'running MUSCLE:'+"\n"
-#        report += '    '+' '.join(muscle_cmd)+"\n"
+            # Run MUSCLE, capture output as it happens
+            #
+            self.log(console, 'RUNNING MUSCLE:')
+            self.log(console, '    '+' '.join(muscle_cmd))
+#            report += "\n"+'running MUSCLE:'+"\n"
+#            report += '    '+' '.join(muscle_cmd)+"\n"
 
-        p = subprocess.Popen(muscle_cmd, \
+            p = subprocess.Popen(muscle_cmd, \
                              cwd = self.scratch, \
                              stdout = subprocess.PIPE, \
                              stderr = subprocess.STDOUT, \
                              shell = False)
 
-        while True:
-            line = p.stdout.readline()
-            if not line: break
-            self.log(console, line.replace('\n', ''))
+            while True:
+                line = p.stdout.readline()
+                if not line: break
+                self.log(console, line.replace('\n', ''))
 
-        p.stdout.close()
-        p.wait()
-        self.log(console, 'return code: ' + str(p.returncode))
-        if p.returncode != 0:
-            raise ValueError('Error running MUSCLE, return code: '+str(p.returncode) + 
-                '\n\n'+ '\n'.join(console))
+            p.stdout.close()
+            p.wait()
+            self.log(console, 'return code: ' + str(p.returncode))
+            if p.returncode != 0:
+                raise ValueError('Error running MUSCLE, return code: '+str(p.returncode) + 
+                                 '\n\n'+ '\n'.join(console))
 
 
-        # Parse the FASTA MSA output
-        #
-        self.log(console, 'PARSING MUSCLE MSA FASTA OUTPUT')
-        if not os.path.isfile(output_aln_file_path):
-            raise ValueError("failed to create MUSCLE output: "+output_aln_file_path)
-        elif not os.path.getsize(output_aln_file_path) > 0:
-            raise ValueError("created empty file for MUSCLE output: "+output_aln_file_path)
-        output_aln_file_handle = open (output_aln_file_path, "r", 0)
+            # Parse the FASTA MSA output
+            #
+            self.log(console, 'PARSING MUSCLE MSA FASTA OUTPUT')
+            if not os.path.isfile(output_aln_file_path):
+                raise ValueError("failed to create MUSCLE output: "+output_aln_file_path)
+            elif not os.path.getsize(output_aln_file_path) > 0:
+                raise ValueError("created empty file for MUSCLE output: "+output_aln_file_path)
+            output_aln_file_handle = open (output_aln_file_path, "r", 0)
 
-        row_order = []
-        alignment = {}
-        alignment_length = None
+            row_order = []
+            alignment = {}
+            alignment_length = None
 
-        last_header = None
-        header = None
-        last_seq = ''
-        leading_chars_pattern = re.compile("^\S+")
-        for line in output_aln_file_handle:
-            line = line.rstrip('\n')
-            if line.startswith('>'):
-                header = line[1:]
+            last_header = None
+            header = None
+            last_seq = ''
+            leading_chars_pattern = re.compile("^\S+")
+            for line in output_aln_file_handle:
+                line = line.rstrip('\n')
+                if line.startswith('>'):
+                    header = line[1:]
 
-                if last_header != None:
-                    last_id = leading_chars_pattern.findall(last_header)[0]
-                    row_order.append(last_id)
-                    #self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
-                    report += last_id+"\t"+last_seq+"\n"
-                    alignment[last_id] = last_seq
-                    if alignment_length == None:
-                        alignment_length = len(last_seq)
-                    elif alignment_length != len(last_seq):
-                        raise ValueError ("unequal alignment row for "+last_header+": '"+last_seq+"'")
-                last_header = header
-                last_seq = ''
-            else:
-                last_seq += line
-        if last_header != None:
-            last_id = leading_chars_pattern.findall(last_header)[0]
-            row_order.append(last_id)
-            #self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
-            report += last_id+"\t"+last_seq+"\n"
-            alignment[last_id] = last_seq
-            if alignment_length == None:
-                alignment_length = len(last_seq)
-            elif alignment_length != len(last_seq):
-                raise ValueError ("unequal alignment row for "+last_header+": '"+last_seq+"'")
+                    if last_header != None:
+                        last_id = leading_chars_pattern.findall(last_header)[0]
+                        row_order.append(last_id)
+                        #self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
+                        report += last_id+"\t"+last_seq+"\n"
+                        alignment[last_id] = last_seq
+                        if alignment_length == None:
+                            alignment_length = len(last_seq)
+                        elif alignment_length != len(last_seq):
+                            raise ValueError ("unequal alignment row for "+last_header+": '"+last_seq+"'")
+                    last_header = header
+                    last_seq = ''
+                else:
+                    last_seq += line
+            if last_header != None:
+                last_id = leading_chars_pattern.findall(last_header)[0]
+                row_order.append(last_id)
+                #self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
+                report += last_id+"\t"+last_seq+"\n"
+                alignment[last_id] = last_seq
+                if alignment_length == None:
+                    alignment_length = len(last_seq)
+                elif alignment_length != len(last_seq):
+                    raise ValueError ("unequal alignment row for "+last_header+": '"+last_seq+"'")
         
-        output_aln_file_handle.close()
+            output_aln_file_handle.close()
 
 
         # load the method provenance from the context object
@@ -927,39 +948,38 @@ class kb_muscle:
 
         # Upload results
         #
-        self.log(console,"UPLOADING RESULTS")  # DEBUG
+        if len(invalid_msgs) == 0:
+            self.log(console,"UPLOADING RESULTS")  # DEBUG
 
-        MSA_name = params['output_name']
-        MSA_description = params['desc']
-        sequence_type = 'protein'
-        ws_refs = None  # may add these later from FeatureSet
-        kb_refs = None
-        #alignment_length  # already have
-        #row_order  # already have
-        #alignment  # already have
-        # NO trim_info
-        # NO alignment_attributes
-        # NO default_row_labels
-        # NO parent_msa_ref
+            MSA_name = params['output_name']
+            MSA_description = params['desc']
+            sequence_type = 'protein'
+            ws_refs = None  # may add these later from FeatureSet
+            kb_refs = None
+#            alignment_length  # already have
+#            row_order  # already have
+#            alignment  # already have
+#            NO trim_info
+#            NO alignment_attributes
+#            NO default_row_labels
+#            NO parent_msa_ref
 
-        
-#        if input_type_name == 'FeatureSet':
-#            features = featureSet['elements']
-#            genome2Features = {}
-#            for fId in row_order:
-#                genomeRef = features[fId][0]
-#                if genomeRef not in genome2Features:
-#                    genome2Features[genomeRef] = []
-#                genome2Features[genomeRef].append(fId)
+#            if input_type_name == 'FeatureSet':
+#                features = featureSet['elements']
+#                genome2Features = {}
+#                for fId in row_order:
+#                    genomeRef = features[fId][0]
+#                    if genomeRef not in genome2Features:
+#                        genome2Features[genomeRef] = []
+#                    genome2Features[genomeRef].append(fId)
 #
-#            for genomeRef in genome2Features:
-#                genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
-#                these_genomeFeatureIds = genome2Features[genomeRef]
-#                for feature in genome['features']:
-#                    if feature['id'] in these_genomeFeatureIds:
+#                for genomeRef in genome2Features:
+#                    genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
+#                    these_genomeFeatureIds = genome2Features[genomeRef]
+#                    for feature in genome['features']:
+#                        if feature['id'] in these_genomeFeatureIds:
 
-
-        output_MSA = {
+            output_MSA = {
                       'name': MSA_name,
                       'description': MSA_description,
                       'sequence_type': sequence_type,
@@ -968,7 +988,7 @@ class kb_muscle:
                       'alignment': alignment
                      }
 
-        new_obj_info = ws.save_objects({
+            new_obj_info = ws.save_objects({
                             'workspace': params['workspace_name'],
                             'objects':[{
                                     'type': 'KBaseTrees.MSA',
@@ -983,16 +1003,24 @@ class kb_muscle:
         # build output report object
         #
         self.log(console,"BUILDING REPORT")  # DEBUG
-#        self.log(console,"sequences in many set: "+str(seq_total))
-#        self.log(console,"sequences in hit set:  "+str(hit_total))
-#        report += 'sequences in many set: '+str(seq_total)+"\n"
-#        report += 'sequences in hit set:  '+str(hit_total)+"\n"
+        if len(invalid_msgs) == 0:
+#            self.log(console,"sequences in many set: "+str(seq_total))
+#            self.log(console,"sequences in hit set:  "+str(hit_total))
+#            report += 'sequences in many set: '+str(seq_total)+"\n"
+#            report += 'sequences in hit set:  '+str(hit_total)+"\n"
+            reportObj = {
+                'objects_created':[{'ref':params['workspace_name']+'/'+params['output_name'], 'description':'MUSCLE_prot MSA'}],
+                'text_message':report
+                }
+        else:
+            report += "FAILURE:\n\n"+"\n".join(invalid_msgs)+"\n"
+            reportObj = {
+                'objects_created':[],
+                'text_message':report
+                }
 
-        reportObj = {
-            'objects_created':[{'ref':params['workspace_name']+'/'+params['output_name'], 'description':'MUSCLE_prot MSA'}],
-            'text_message':report
-        }
         reportName = 'muscle_report_'+str(hex(uuid.getnode()))
+        ws = workspaceService(self.workspaceURL, token=ctx['token'])
         report_obj_info = ws.save_objects({
 #                'id':info[6],
                 'workspace':params['workspace_name'],
