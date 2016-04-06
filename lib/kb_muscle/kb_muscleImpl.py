@@ -591,8 +591,8 @@ class kb_muscle:
                 'text_message':report
                 }
         else:
+            report += "FAILURE:\n\n"+"\n".join(invalid_msgs)+"\n"
             reportObj = {
-                report += "FAILURE:\n\n"+"\n".join(invalid_msgs)+"\n"
                 'objects_created':[],
                 'text_message':report
                 }
