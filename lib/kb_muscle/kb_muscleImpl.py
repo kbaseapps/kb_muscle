@@ -57,14 +57,6 @@ class kb_muscle:
         print(message)
         sys.stdout.flush()
 
-    # target is a list for collecting log messages pertaining to failed validation tests
-    def invalid_log(self, target, message):
-        # we should do something better here...
-        if target is not None:
-            target.append(message)
-        #print(message)
-        #sys.stdout.flush()
-
     def get_single_end_read_library(self, ws_data, ws_info, forward):
         pass
 
@@ -798,11 +790,11 @@ class kb_muscle:
                         #record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
                         if feature['type'] != 'CDS':
                             self.log(console,"attempt to include non-CDS Feature "+feature['id'])
-                            self.invalid_log(invalid_msgs,"attempt to include non-CDS Feature "+feature['id'])
+                            self.log(invalid_msgs,"attempt to include non-CDS Feature "+feature['id'])
                             continue
                         elif 'protein_translation' not in feature or feature['protein_translation'] == None:
                             self.log(console,"bad CDS Feature "+feature['id']+": no protein_translation found")
-                            self.invalid_log(invalid_msgs,"bad CDS Feature "+feature['id']+": no protein_translation found")
+                            self.log(invalid_msgs,"bad CDS Feature "+feature['id']+": no protein_translation found")
                             continue
                         else:
                             record = SeqRecord(Seq(feature['protein_translation']), id=feature['id'], description=genome['id'])
@@ -810,7 +802,7 @@ class kb_muscle:
                             records.append(record)
 
             if proteins_found < 2:
-                self.invalid_log(invalid_msgs,"Less than 2 protein Features (CDS) found.  exiting...")
+                self.log(invalid_msgs,"Less than 2 protein Features (CDS) found.  exiting...")
             else:
                 SeqIO.write(records, input_forward_reads_file_path, "fasta")
 
