@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: Multiple Sequence Alignment (MSA) - MUSCLE protein seqs
+name: MUSCLE Multiple Sequence Alignment (MSA) - protein seqs
 tooltip: |
     Build Multiple Sequence Alignment (MSA) for protein sequences with MUSCLE.  Only genes that code for proteins will be included.
 screenshots: []
