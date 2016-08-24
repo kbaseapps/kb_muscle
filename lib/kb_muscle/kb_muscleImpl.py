@@ -22,11 +22,7 @@ from requests_toolbelt import MultipartEncoder  # added
 from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # added
 
 # KBase Data API
-import doekbase.data_api
 from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI
-from doekbase.data_api.sequence.assembly.api import AssemblyAPI
-from doekbase.data_api.taxonomy.taxon.api import TaxonAPI
-#from doekbase.data_api.core import ObjectAPI
     
 # Standard setup for accessing Data API
 #services = {"workspace_service_url": "https://ci.kbase.us/services/ws/",
