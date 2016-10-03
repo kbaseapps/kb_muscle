@@ -602,7 +602,7 @@ class kb_muscle:
                 'text_message':report
                 }
 
-        reportName = 'muscle_report_'+str(hex(uuid.getnode()))
+        reportName = 'muscle_report_'+str(uuid.uuid4())
         ws = workspaceService(self.workspaceURL, token=ctx['token'])
         report_obj_info = ws.save_objects({
 #                'id':info[6],
@@ -1023,7 +1023,7 @@ class kb_muscle:
                 'text_message':report
                 }
 
-        reportName = 'muscle_report_'+str(hex(uuid.getnode()))
+        reportName = 'muscle_report_'+str(uuid.uuid4())
         ws = workspaceService(self.workspaceURL, token=ctx['token'])
         report_obj_info = ws.save_objects({
 #                'id':info[6],
