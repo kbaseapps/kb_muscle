@@ -26,7 +26,7 @@ module kb_muscle {
     typedef structure {
         workspace_name workspace_name;
 	string         desc;
-	data_obj_name  input_ref;
+	data_obj_ref   input_ref;
         data_obj_name  output_name;
 	int            maxiters;
 	float          maxhours;
@@ -50,7 +50,7 @@ module kb_muscle {
     /*  Methods for MSA building of either DNA or PROTEIN sequences
     **
     **    overloading as follows:
-    **        input_name: SingleEndLibrary, FeatureSet
+    **        input_ref: SingleEndLibrary (just MUSCLE_nuc), FeatureSet (both)
     **        output_name: MSA
     */
     funcdef MUSCLE_nuc (MUSCLE_Params params)  returns (MUSCLE_Output) authentication required;

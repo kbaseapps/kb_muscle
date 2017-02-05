@@ -128,16 +128,16 @@ $return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
 	desc has a value which is a string
-	input_ref has a value which is a kb_muscle.data_obj_name
+	input_ref has a value which is a kb_muscle.data_obj_ref
 	output_name has a value which is a kb_muscle.data_obj_name
 	maxiters has a value which is an int
 	maxhours has a value which is a float
 workspace_name is a string
+data_obj_ref is a string
 data_obj_name is a string
 MUSCLE_Output is a reference to a hash where the following keys are defined:
 	report_name has a value which is a kb_muscle.data_obj_name
 	report_ref has a value which is a kb_muscle.data_obj_ref
-data_obj_ref is a string
 
 </pre>
 
@@ -150,16 +150,16 @@ $return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
 	desc has a value which is a string
-	input_ref has a value which is a kb_muscle.data_obj_name
+	input_ref has a value which is a kb_muscle.data_obj_ref
 	output_name has a value which is a kb_muscle.data_obj_name
 	maxiters has a value which is an int
 	maxhours has a value which is a float
 workspace_name is a string
+data_obj_ref is a string
 data_obj_name is a string
 MUSCLE_Output is a reference to a hash where the following keys are defined:
 	report_name has a value which is a kb_muscle.data_obj_name
 	report_ref has a value which is a kb_muscle.data_obj_ref
-data_obj_ref is a string
 
 
 =end text
@@ -169,7 +169,7 @@ data_obj_ref is a string
 Methods for MSA building of either DNA or PROTEIN sequences
 **
 **    overloading as follows:
-**        input_name: SingleEndLibrary, FeatureSet
+**        input_ref: SingleEndLibrary (just MUSCLE_nuc), FeatureSet (both)
 **        output_name: MSA
 
 =back
@@ -240,16 +240,16 @@ $return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
 	desc has a value which is a string
-	input_ref has a value which is a kb_muscle.data_obj_name
+	input_ref has a value which is a kb_muscle.data_obj_ref
 	output_name has a value which is a kb_muscle.data_obj_name
 	maxiters has a value which is an int
 	maxhours has a value which is a float
 workspace_name is a string
+data_obj_ref is a string
 data_obj_name is a string
 MUSCLE_Output is a reference to a hash where the following keys are defined:
 	report_name has a value which is a kb_muscle.data_obj_name
 	report_ref has a value which is a kb_muscle.data_obj_ref
-data_obj_ref is a string
 
 </pre>
 
@@ -262,16 +262,16 @@ $return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
 	desc has a value which is a string
-	input_ref has a value which is a kb_muscle.data_obj_name
+	input_ref has a value which is a kb_muscle.data_obj_ref
 	output_name has a value which is a kb_muscle.data_obj_name
 	maxiters has a value which is an int
 	maxhours has a value which is a float
 workspace_name is a string
+data_obj_ref is a string
 data_obj_name is a string
 MUSCLE_Output is a reference to a hash where the following keys are defined:
 	report_name has a value which is a kb_muscle.data_obj_name
 	report_ref has a value which is a kb_muscle.data_obj_ref
-data_obj_ref is a string
 
 
 =end text
@@ -527,7 +527,7 @@ MUSCLE Input Params
 a reference to a hash where the following keys are defined:
 workspace_name has a value which is a kb_muscle.workspace_name
 desc has a value which is a string
-input_ref has a value which is a kb_muscle.data_obj_name
+input_ref has a value which is a kb_muscle.data_obj_ref
 output_name has a value which is a kb_muscle.data_obj_name
 maxiters has a value which is an int
 maxhours has a value which is a float
@@ -541,7 +541,7 @@ maxhours has a value which is a float
 a reference to a hash where the following keys are defined:
 workspace_name has a value which is a kb_muscle.workspace_name
 desc has a value which is a string
-input_ref has a value which is a kb_muscle.data_obj_name
+input_ref has a value which is a kb_muscle.data_obj_ref
 output_name has a value which is a kb_muscle.data_obj_name
 maxiters has a value which is an int
 maxhours has a value which is a float

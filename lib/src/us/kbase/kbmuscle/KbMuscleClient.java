@@ -171,7 +171,7 @@ public class KbMuscleClient {
      * Methods for MSA building of either DNA or PROTEIN sequences
      * **
      * **    overloading as follows:
-     * **        input_name: SingleEndLibrary, FeatureSet
+     * **        input_ref: SingleEndLibrary (just MUSCLE_nuc), FeatureSet (both)
      * **        output_name: MSA
      * </pre>
      * @param   params   instance of type {@link us.kbase.kbmuscle.MUSCLEParams MUSCLEParams} (original type "MUSCLE_Params")

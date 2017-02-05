@@ -38,7 +38,7 @@ class kb_muscle(object):
         Methods for MSA building of either DNA or PROTEIN sequences
         **
         **    overloading as follows:
-        **        input_name: SingleEndLibrary, FeatureSet
+        **        input_ref: SingleEndLibrary (just MUSCLE_nuc), FeatureSet (both)
         **        output_name: MSA
         :param params: instance of type "MUSCLE_Params" (MUSCLE Input Params)
            -> structure: parameter "workspace_name" of type "workspace_name"
@@ -50,7 +50,7 @@ class kb_muscle(object):
            should just be used for workspace ** "name" is a string identifier
            of a workspace or object.  This is received from Narrative.),
            parameter "desc" of String, parameter "input_ref" of type
-           "data_obj_name", parameter "output_name" of type "data_obj_name",
+           "data_obj_ref", parameter "output_name" of type "data_obj_name",
            parameter "maxiters" of Long, parameter "maxhours" of Double
         :returns: instance of type "MUSCLE_Output" (MUSCLE Output) ->
            structure: parameter "report_name" of type "data_obj_name",
@@ -72,7 +72,7 @@ class kb_muscle(object):
            should just be used for workspace ** "name" is a string identifier
            of a workspace or object.  This is received from Narrative.),
            parameter "desc" of String, parameter "input_ref" of type
-           "data_obj_name", parameter "output_name" of type "data_obj_name",
+           "data_obj_ref", parameter "output_name" of type "data_obj_name",
            parameter "maxiters" of Long, parameter "maxhours" of Double
         :returns: instance of type "MUSCLE_Output" (MUSCLE Output) ->
            structure: parameter "report_name" of type "data_obj_name",

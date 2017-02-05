@@ -19,8 +19,9 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import generic_protein
 from biokbase.workspace.client import Workspace as workspaceService
-from requests_toolbelt import MultipartEncoder  # added
-from biokbase.AbstractHandle.Client import AbstractHandle as HandleService  # added
+from requests_toolbelt import MultipartEncoder
+from biokbase.AbstractHandle.Client import AbstractHandle as HandleService
+from KBaseReport.KBaseReportClient import KBaseReport
 
 # KBase Data API
 #from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI as GenomeAnnotationAPI
@@ -58,7 +59,7 @@ class kb_muscle:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/kbaseapps/kb_muscle.git"
-    GIT_COMMIT_HASH = "c2c35aa3dfc199b4dc3c1f94278e66c7634d08a3"
+    GIT_COMMIT_HASH = "d30a3d23ddd5769d9455ae5e1dc0f570a688457f"
 
     #BEGIN_CLASS_HEADER
     workspaceURL = None
@@ -243,7 +244,7 @@ class kb_muscle:
         Methods for MSA building of either DNA or PROTEIN sequences
         **
         **    overloading as follows:
-        **        input_name: SingleEndLibrary, FeatureSet
+        **        input_ref: SingleEndLibrary (just MUSCLE_nuc), FeatureSet (both)
         **        output_name: MSA
         :param params: instance of type "MUSCLE_Params" (MUSCLE Input Params)
            -> structure: parameter "workspace_name" of type "workspace_name"
@@ -255,7 +256,7 @@ class kb_muscle:
            should just be used for workspace ** "name" is a string identifier
            of a workspace or object.  This is received from Narrative.),
            parameter "desc" of String, parameter "input_ref" of type
-           "data_obj_name", parameter "output_name" of type "data_obj_name",
+           "data_obj_ref", parameter "output_name" of type "data_obj_name",
            parameter "maxiters" of Long, parameter "maxhours" of Double
         :returns: instance of type "MUSCLE_Output" (MUSCLE Output) ->
            structure: parameter "report_name" of type "data_obj_name",
@@ -277,21 +278,22 @@ class kb_muscle:
         #
         if 'workspace_name' not in params:
             raise ValueError('workspace_name parameter is required')
-        if 'input_name' not in params:
-            raise ValueError('input_name parameter is required')
+        if 'input_ref' not in params:
+            raise ValueError('input_ref parameter is required')
         if 'output_name' not in params:
             raise ValueError('output_name parameter is required')
 
 
-        #### Get the input_name object
+        #### Get the input_ref object
         ##
         input_forward_reads_file_compression = None
         sequencing_tech = 'N/A'
         try:
             ws = workspaceService(self.workspaceURL, token=ctx['token'])
-            objects = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_name']}])
+            objects = ws.get_objects([{'ref': params['input_ref']}])
             data = objects[0]['data']
             info = objects[0]['info']
+            input_name = info[1]
             input_type_name = info[2].split('.')[1].split('-')[0]
 
             if input_type_name == 'SingleEndLibrary':
@@ -310,10 +312,10 @@ class kb_muscle:
 
         except Exception as e:
             traceback.format_exc()
-            raise ValueError('Unable to fetch input_name object from workspace: ' + str(e))
+            raise ValueError('Unable to fetch input_ref object from workspace: ' + str(e))
 
 
-        # Handle overloading (input_name can be SingleEndLibrary or FeatureSet)
+        # Handle overloading (input_ref can be SingleEndLibrary or FeatureSet)
         #
         if input_type_name == 'SingleEndLibrary':
 
@@ -411,7 +413,7 @@ class kb_muscle:
                 genome2Features[genomeRef].append(fId)
 
             # export features to FASTA file
-            input_forward_reads_file_path = os.path.join(self.scratch, params['input_name']+".fasta")
+            input_forward_reads_file_path = os.path.join(self.scratch, input_name+".fasta")
             self.log(console, 'writing fasta file: '+input_forward_reads_file_path)
             records = []
             for genomeRef in genome2Features:
@@ -428,7 +430,7 @@ class kb_muscle:
         # Missing proper input_input_type
         #
         else:
-            raise ValueError('Cannot yet handle input_name type of: '+type_name)
+            raise ValueError('Cannot yet handle input_ref type of: '+type_name)
 
 
         ### Construct the command
@@ -450,7 +452,7 @@ class kb_muscle:
         output_dir = os.path.join(self.scratch,'output.'+str(timestamp))
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-        output_aln_file_path = os.path.join(output_dir, params['input_name']+'-MSA.fasta');
+        output_aln_file_path = os.path.join(output_dir, input_name+'-MSA.fasta');
         file_extension = ''
 
         muscle_cmd.append('-in')
@@ -551,7 +553,7 @@ class kb_muscle:
             provenance = ctx['provenance']
         # add additional info to provenance here, in this case the input data object reference
         provenance[0]['input_ws_objects'] = []
-        provenance[0]['input_ws_objects'].append(params['workspace_name']+'/'+params['input_name'])
+        provenance[0]['input_ws_objects'].append(params['input_ref'])
         provenance[0]['service'] = 'kb_muscle'
         provenance[0]['method'] = 'MUSCLE_nuc'
 
@@ -675,7 +677,7 @@ class kb_muscle:
            should just be used for workspace ** "name" is a string identifier
            of a workspace or object.  This is received from Narrative.),
            parameter "desc" of String, parameter "input_ref" of type
-           "data_obj_name", parameter "output_name" of type "data_obj_name",
+           "data_obj_ref", parameter "output_name" of type "data_obj_name",
            parameter "maxiters" of Long, parameter "maxhours" of Double
         :returns: instance of type "MUSCLE_Output" (MUSCLE Output) ->
            structure: parameter "report_name" of type "data_obj_name",
@@ -697,21 +699,22 @@ class kb_muscle:
         #
         if 'workspace_name' not in params:
             raise ValueError('workspace_name parameter is required')
-        if 'input_name' not in params:
-            raise ValueError('input_name parameter is required')
+        if 'input_ref' not in params:
+            raise ValueError('input_ref parameter is required')
         if 'output_name' not in params:
             raise ValueError('output_name parameter is required')
 
 
-        #### Get the input_name object
+        #### Get the input_ref object
         ##
 #        input_forward_reads_file_compression = None
 #        sequencing_tech = 'N/A'
         try:
             ws = workspaceService(self.workspaceURL, token=ctx['token'])
-            objects = ws.get_objects([{'ref': params['workspace_name']+'/'+params['input_name']}])
+            objects = ws.get_objects([{'ref': params['input_ref']}])
             data = objects[0]['data']
             info = objects[0]['info']
+            input_name = info[1]
             input_type_name = info[2].split('.')[1].split('-')[0]
 
 #            if input_type_name == 'SingleEndLibrary':
@@ -730,7 +733,7 @@ class kb_muscle:
 
         except Exception as e:
             traceback.format_exc()
-            raise ValueError('Unable to fetch input_name object from workspace: ' + str(e))
+            raise ValueError('Unable to fetch input_ref object from workspace: ' + str(e))
 
 
         # Handle overloading (input_name can be SingleEndLibrary or FeatureSet)
@@ -834,7 +837,7 @@ class kb_muscle:
                 genome2Features[genomeRef].append(fId)
 
             # export features to FASTA file
-            input_forward_reads_file_path = os.path.join(self.scratch, params['input_name']+".fasta")
+            input_forward_reads_file_path = os.path.join(self.scratch, input_name+".fasta")
             self.log(console, 'writing fasta file: '+input_forward_reads_file_path)
             records = []
             proteins_found = 0
@@ -866,7 +869,7 @@ class kb_muscle:
         # Missing proper input_input_type
         #
         else:
-            raise ValueError('Cannot yet handle input_name type of: '+type_name)
+            raise ValueError('Cannot yet handle input_ref type of: '+type_name)
 
 
         ### Construct the command
@@ -889,7 +892,7 @@ class kb_muscle:
             output_dir = os.path.join(self.scratch,'output.'+str(timestamp))
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            output_aln_file_path = os.path.join(output_dir, params['input_name']+'-MSA.fasta');
+            output_aln_file_path = os.path.join(output_dir, input_name+'-MSA.fasta');
             file_extension = ''
 
             muscle_cmd.append('-in')
@@ -990,7 +993,7 @@ class kb_muscle:
             provenance = ctx['provenance']
         # add additional info to provenance here, in this case the input data object reference
         provenance[0]['input_ws_objects'] = []
-        provenance[0]['input_ws_objects'].append(params['workspace_name']+'/'+params['input_name'])
+        provenance[0]['input_ws_objects'].append(params['input_ref'])
         provenance[0]['service'] = 'kb_muscle'
         provenance[0]['method'] = 'MUSCLE_prot'
 
