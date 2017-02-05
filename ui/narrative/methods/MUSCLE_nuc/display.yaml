@@ -34,7 +34,7 @@ parameters :
             Describe Contents of the Output MSA
         placeholder: |
             Enter Description
-    input_name:
+    input_ref:
         ui-name : |
             Input Features
         short-hint : |
