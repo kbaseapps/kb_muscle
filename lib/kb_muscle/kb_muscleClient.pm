@@ -128,7 +128,7 @@ $return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
 	desc has a value which is a string
-	input_name has a value which is a kb_muscle.data_obj_name
+	input_ref has a value which is a kb_muscle.data_obj_name
 	output_name has a value which is a kb_muscle.data_obj_name
 	maxiters has a value which is an int
 	maxhours has a value which is a float
@@ -150,7 +150,7 @@ $return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
 	desc has a value which is a string
-	input_name has a value which is a kb_muscle.data_obj_name
+	input_ref has a value which is a kb_muscle.data_obj_name
 	output_name has a value which is a kb_muscle.data_obj_name
 	maxiters has a value which is an int
 	maxhours has a value which is a float
@@ -199,9 +199,10 @@ Methods for MSA building of either DNA or PROTEIN sequences
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "kb_muscle.MUSCLE_nuc",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "kb_muscle.MUSCLE_nuc",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -239,7 +240,7 @@ $return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
 	desc has a value which is a string
-	input_name has a value which is a kb_muscle.data_obj_name
+	input_ref has a value which is a kb_muscle.data_obj_name
 	output_name has a value which is a kb_muscle.data_obj_name
 	maxiters has a value which is an int
 	maxhours has a value which is a float
@@ -261,7 +262,7 @@ $return is a kb_muscle.MUSCLE_Output
 MUSCLE_Params is a reference to a hash where the following keys are defined:
 	workspace_name has a value which is a kb_muscle.workspace_name
 	desc has a value which is a string
-	input_name has a value which is a kb_muscle.data_obj_name
+	input_ref has a value which is a kb_muscle.data_obj_name
 	output_name has a value which is a kb_muscle.data_obj_name
 	maxiters has a value which is an int
 	maxhours has a value which is a float
@@ -306,9 +307,10 @@ data_obj_ref is a string
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "kb_muscle.MUSCLE_prot",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "kb_muscle.MUSCLE_prot",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -329,6 +331,36 @@ data_obj_ref is a string
 }
  
   
+sub status
+{
+    my($self, @args) = @_;
+    if ((my $n = @args) != 0) {
+        Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+                                   "Invalid argument count for function status (received $n, expecting 0)");
+    }
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+        method => "kb_muscle.status",
+        params => \@args,
+    });
+    if ($result) {
+        if ($result->is_error) {
+            Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+                           code => $result->content->{error}->{code},
+                           method_name => 'status',
+                           data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+                          );
+        } else {
+            return wantarray ? @{$result->result} : $result->result->[0];
+        }
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method status",
+                        status_line => $self->{client}->status_line,
+                        method_name => 'status',
+                       );
+    }
+}
+   
 
 sub version {
     my ($self) = @_;
@@ -495,7 +527,7 @@ MUSCLE Input Params
 a reference to a hash where the following keys are defined:
 workspace_name has a value which is a kb_muscle.workspace_name
 desc has a value which is a string
-input_name has a value which is a kb_muscle.data_obj_name
+input_ref has a value which is a kb_muscle.data_obj_name
 output_name has a value which is a kb_muscle.data_obj_name
 maxiters has a value which is an int
 maxhours has a value which is a float
@@ -509,7 +541,7 @@ maxhours has a value which is a float
 a reference to a hash where the following keys are defined:
 workspace_name has a value which is a kb_muscle.workspace_name
 desc has a value which is a string
-input_name has a value which is a kb_muscle.data_obj_name
+input_ref has a value which is a kb_muscle.data_obj_name
 output_name has a value which is a kb_muscle.data_obj_name
 maxiters has a value which is an int
 maxhours has a value which is a float

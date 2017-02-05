@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #BEGIN_HEADER
 import os
 import sys
@@ -49,12 +50,16 @@ class kb_muscle:
 **
     '''
 
-    ######## WARNING FOR GEVENT USERS #######
+    ######## WARNING FOR GEVENT USERS ####### noqa
     # Since asynchronous IO can lead to methods - even the same method -
     # interrupting each other, you must be *very* careful when using global
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
-    #########################################
+    ######################################### noqa
+    VERSION = "0.0.1"
+    GIT_URL = "https://github.com/kbaseapps/kb_muscle.git"
+    GIT_COMMIT_HASH = "c2c35aa3dfc199b4dc3c1f94278e66c7634d08a3"
+
     #BEGIN_CLASS_HEADER
     workspaceURL = None
     shockURL = None
@@ -232,7 +237,30 @@ class kb_muscle:
         #END_CONSTRUCTOR
         pass
 
+
     def MUSCLE_nuc(self, ctx, params):
+        """
+        Methods for MSA building of either DNA or PROTEIN sequences
+        **
+        **    overloading as follows:
+        **        input_name: SingleEndLibrary, FeatureSet
+        **        output_name: MSA
+        :param params: instance of type "MUSCLE_Params" (MUSCLE Input Params)
+           -> structure: parameter "workspace_name" of type "workspace_name"
+           (** The workspace object refs are of form: ** **    objects =
+           ws.get_objects([{'ref':
+           params['workspace_id']+'/'+params['obj_name']}]) ** ** "ref" means
+           the entire name combining the workspace id and the object name **
+           "id" is a numerical identifier of the workspace or object, and
+           should just be used for workspace ** "name" is a string identifier
+           of a workspace or object.  This is received from Narrative.),
+           parameter "desc" of String, parameter "input_ref" of type
+           "data_obj_name", parameter "output_name" of type "data_obj_name",
+           parameter "maxiters" of Long, parameter "maxhours" of Double
+        :returns: instance of type "MUSCLE_Output" (MUSCLE Output) ->
+           structure: parameter "report_name" of type "data_obj_name",
+           parameter "report_ref" of type "data_obj_ref"
+        """
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN MUSCLE_nuc
@@ -636,6 +664,23 @@ class kb_muscle:
         return [returnVal]
 
     def MUSCLE_prot(self, ctx, params):
+        """
+        :param params: instance of type "MUSCLE_Params" (MUSCLE Input Params)
+           -> structure: parameter "workspace_name" of type "workspace_name"
+           (** The workspace object refs are of form: ** **    objects =
+           ws.get_objects([{'ref':
+           params['workspace_id']+'/'+params['obj_name']}]) ** ** "ref" means
+           the entire name combining the workspace id and the object name **
+           "id" is a numerical identifier of the workspace or object, and
+           should just be used for workspace ** "name" is a string identifier
+           of a workspace or object.  This is received from Narrative.),
+           parameter "desc" of String, parameter "input_ref" of type
+           "data_obj_name", parameter "output_name" of type "data_obj_name",
+           parameter "maxiters" of Long, parameter "maxhours" of Double
+        :returns: instance of type "MUSCLE_Output" (MUSCLE Output) ->
+           structure: parameter "report_name" of type "data_obj_name",
+           parameter "report_ref" of type "data_obj_ref"
+        """
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN MUSCLE_prot
@@ -1054,4 +1099,13 @@ class kb_muscle:
             raise ValueError('Method MUSCLE_prot return value ' +
                              'returnVal is not type dict as required.')
         # return the results
+        return [returnVal]
+    def status(self, ctx):
+        #BEGIN_STATUS
+        returnVal = {'state': "OK",
+                     'message': "",
+                     'version': self.VERSION,
+                     'git_url': self.GIT_URL,
+                     'git_commit_hash': self.GIT_COMMIT_HASH}
+        #END_STATUS
         return [returnVal]
