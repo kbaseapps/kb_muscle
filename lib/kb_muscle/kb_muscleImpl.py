@@ -63,9 +63,12 @@ class kb_muscle:
     GIT_COMMIT_HASH = "d30a3d23ddd5769d9455ae5e1dc0f570a688457f"
 
     #BEGIN_CLASS_HEADER
-    workspaceURL = None
-    shockURL = None
-    handleURL = None
+    workspaceURL     = None
+    shockURL         = None
+    handleURL        = None
+    serviceWizardURL = None
+    callbackURL      = None
+    scratch          = None
 
     MUSCLE_bin = '/kb/module/muscle/bin/muscle'
 
@@ -210,6 +213,12 @@ class kb_muscle:
         self.workspaceURL = config['workspace-url']
         self.shockURL = config['shock-url']
         self.handleURL = config['handle-service-url']
+        self.serviceWizardURL = config['service-wizard-url']
+
+        self.callbackURL = os.environ.get('SDK_CALLBACK_URL')
+        if self.callbackURL == None:
+            raise ValueError ("SDK_CALLBACK_URL not set in environment")
+
         self.scratch = os.path.abspath(config['scratch'])
         # HACK!! temporary hack for issue where megahit fails on mac because of silent named pipe error
         #self.host_scratch = self.scratch
