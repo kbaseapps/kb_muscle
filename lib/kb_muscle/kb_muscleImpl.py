@@ -544,8 +544,8 @@ class kb_muscle:
         # Upload results
         #
         if len(invalid_msgs) == 0:
-            self.log(console,"UPLOADING RESULTS")  # DEBUG
 
+            self.log(console,"UPLOADING RESULTS")  # DEBUG
             MSA_name = params['output_name']
             MSA_description = params['desc']
             sequence_type = 'dna'
@@ -678,7 +678,7 @@ class kb_muscle:
                         strong = False
                         for strong_group in strong_groups.keys():
                             this_strong_group = True
-                            for seen_char in col_chars.keys:
+                            for seen_char in col_chars.keys():
                                 if seen_char not in strong_group:
                                     this_strong_group = False
                                     break
@@ -690,7 +690,7 @@ class kb_muscle:
                             if weak_groups != None:
                                 for weak_group in weak_groups.keys():
                                     this_weak_group = True
-                                    for seen_char in col_chars.keys:
+                                    for seen_char in col_chars.keys():
                                         if seen_char not in weak_group:
                                             this_strong_group = False
                                             break
