@@ -1017,11 +1017,11 @@ class kb_muscle:
                     if feature['id'] in these_genomeFeatureIds:
                         #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                         #record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
-                        if feature['type'] != 'CDS':
-                            self.log(console,"attempt to include non-CDS Feature "+feature['id'])
-                            self.log(invalid_msgs,"attempt to include non-CDS Feature "+feature['id'])
-                            continue
-                        elif 'protein_translation' not in feature or feature['protein_translation'] == None:
+                        #if feature['protein_translation'] != 'CDS':
+                        #    self.log(console,"attempt to include non-CDS Feature "+feature['id'])
+                        #    self.log(invalid_msgs,"attempt to include non-CDS Feature "+feature['id'])
+                        #    continue
+                        if 'protein_translation' not in feature or feature['protein_translation'] == None:
                             self.log(console,"bad CDS Feature "+feature['id']+": no protein_translation found")
                             self.log(invalid_msgs,"bad CDS Feature "+feature['id']+": no protein_translation found")
                             continue
