@@ -653,7 +653,7 @@ class kb_muscle:
                     aln_chunk_upper_bound = (chunk_i+1)*max_row_width
                     if aln_chunk_upper_bound > alignment_length:
                         aln_chunk_upper_bound = alignment_length
-                    aln_chunk = alignment[chunk_i*max_row_width:aln_chunk_upper_bound]
+                    aln_chunk = alignment[row_id][chunk_i*max_row_width:aln_chunk_upper_bound]
                     for c in aln_chunk:
                         if c != '-':
                             aln_pos_by_id[row_id] += 1
