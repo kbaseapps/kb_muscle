@@ -1061,7 +1061,7 @@ class kb_muscle:
             output_dir = os.path.join(self.scratch,'output.'+str(timestamp))
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            output_aln_file_path = os.path.join(output_dir, input_name+'-MSA.fasta');
+            output_aln_file_path = os.path.join(output_dir, params['output_name']+'-MSA.fasta');
             file_extension = ''
 
             muscle_cmd.append('-in')
@@ -1221,46 +1221,224 @@ class kb_muscle:
                         })
 
 
-        # build output report object
-        #
-        self.log(console,"BUILDING REPORT")  # DEBUG
-        if len(invalid_msgs) == 0:
-#            self.log(console,"sequences in many set: "+str(seq_total))
-#            self.log(console,"sequences in hit set:  "+str(hit_total))
-#            report += 'sequences in many set: '+str(seq_total)+"\n"
-#            report += 'sequences in hit set:  '+str(hit_total)+"\n"
+            # create CLW formatted output file
+            max_row_width = 60
+            id_aln_gap_width = 1
+            gap_chars = ''
+            for sp_i in range(id_aln_gap_width):
+                gap_chars += ' '
+# DNA
+#            strong_groups = { 'AG': True,
+#                              'CTU': True
+#                              }
+#            weak_groups = None
+# PROTEINS
+            strong_groups = { 'AST':  True,
+                              'EKNQ': True,
+                              'HKNQ': True,
+                              'DENQ': True,
+                              'HKQR': True,
+                              'ILMV': True,
+                              'FILM': True,
+                              'HY':   True,
+                              'FWY':  True
+                              }
+            weak_groups = { 'ACS':    True,
+                            'ATV':    True,
+                            'AGS':    True,
+                            'KNST':   True,
+                            'APST':   True,
+                            'DGNS':   True,
+                            'DEKNQS': True,
+                            'DEHKNQ': True,
+                            'EHKNQR': True,
+                            'FILMV':  True,
+                            'FHY':    True
+                            }
+
+            clw_buf = []
+            clw_buf.append ('CLUSTALW '+MSA_name+': '+MSA_description)
+            clw_buf.append ('')
+
+            long_id_len = 0
+            aln_pos_by_id = dict()
+            for row_id in row_order:
+                aln_pos_by_id[row_id] = 0
+                if long_id_len < len(row_id):
+                    long_id_len = len(row_id)
+
+            full_row_cnt = alignment_length // max_row_width
+            if alignment_length % max_row_width == 0:
+                full_row_cnt -= 1
+            for chunk_i in range (full_row_cnt + 1):
+                for row_id in row_order:
+                    row_id_disp = row_id
+                    for sp_i in range (long_id_len-len(row_id)):
+                        row_id_disp += ' '
+
+                    aln_chunk_upper_bound = (chunk_i+1)*max_row_width
+                    if aln_chunk_upper_bound > alignment_length:
+                        aln_chunk_upper_bound = alignment_length
+                    aln_chunk = alignment[row_id][chunk_i*max_row_width:aln_chunk_upper_bound]
+                    for c in aln_chunk:
+                        if c != '-':
+                            aln_pos_by_id[row_id] += 1
+
+                    clw_buf.append (row_id_disp+gap_chars+aln_chunk+' '+str(aln_pos_by_id[row_id]))
+
+                # conservation line
+                cons_line = ''
+                for pos_i in range(chunk_i*max_row_width, aln_chunk_upper_bound):
+                    col_chars = dict()
+                    seq_cnt = 0
+                    for row_id in row_order:
+                        char = alignment[row_id][pos_i]
+                        if char != '-':
+                            seq_cnt += 1
+                            col_chars[char] = True
+                    if seq_cnt <= 1:
+                        cons_char = ' '
+                    elif len(col_chars.keys()) == 1:
+                        cons_char = '*'
+                    else:
+                        strong = False
+                        for strong_group in strong_groups.keys():
+                            this_strong_group = True
+                            for seen_char in col_chars.keys():
+                                if seen_char not in strong_group:
+                                    this_strong_group = False
+                                    break
+                            if this_strong_group:
+                                strong = True
+                                break
+                        if not strong:
+                            weak = False
+                            if weak_groups != None:
+                                for weak_group in weak_groups.keys():
+                                    this_weak_group = True
+                                    for seen_char in col_chars.keys():
+                                        if seen_char not in weak_group:
+                                            this_strong_group = False
+                                            break
+                                    if this_weak_group:
+                                        weak = True
+                        if strong:
+                            cons_char = ':'
+                        elif weak:
+                            cons_char = '.'
+                        else:
+                            cons_char = ' '
+                    cons_line += cons_char
+
+                lead_space = ''
+                for sp_i in range(long_id_len):
+                    lead_space += ' '
+                lead_space += gap_chars
+
+                clw_buf.append(lead_space+cons_line)
+                clw_buf.append('')
+
+            # write clw to file
+            clw_buf_str = "\n".join(clw_buf)+"\n"
+            output_clw_file_path = os.path.join(output_dir, input_name+'-MSA.clw');
+            with open (output_clw_file_path, "w", 0) as output_clw_file_handle:
+                output_clw_file_handle.write(clw_buf_str)
+            output_clw_file_handle.close()
+
+
+            # upload MUSCLE FASTA output to SHOCK for file_links
+            dfu = DFUClient(self.callbackURL)
+            try:
+                output_upload_ret = dfu.file_to_shock({'file_path': output_aln_file_path,
+# DEBUG
+#                                                      'make_handle': 0,
+#                                                      'pack': 'zip'})
+                                                       'make_handle': 0})
+            except:
+                raise ValueError ('error loading aln_out file to shock')
+
+            # upload MUSCLE CLW output to SHOCK for file_links
+            try:
+                output_clw_upload_ret = dfu.file_to_shock({'file_path': output_clw_file_path,
+# DEBUG
+#                                                      'make_handle': 0,
+#                                                      'pack': 'zip'})
+                                                           'make_handle': 0})
+            except:
+                raise ValueError ('error loading clw_out file to shock')
+
+
+            # make HTML reports
+            #
+            # HERE
+
+
+
+            # build output report object
+            #
+            self.log(console,"BUILDING REPORT")  # DEBUG
+
+            reportName = 'muscle_report_'+str(uuid.uuid4())
             reportObj = {
-                'objects_created':[{'ref':params['workspace_name']+'/'+params['output_name'], 'description':'MUSCLE_prot MSA'}],
-                'text_message':report
+                'objects_created':[{'ref':params['workspace_name']+'/'+params['output_name'],
+                                    'description':'MUSCLE_prot MSA'}],
+                #'message': '',
+                'message': clw_buf_str,
+                'direct_html': '',
+                'direct_html_index': None,
+                'file_links': [],
+                'html_links': [],
+                'workspace_name': params['workspace_name'],
+                'report_object_name': reportName
                 }
-        else:
+            reportObj['file_links'] = [{'shock_id': output_upload_ret['shock_id'],
+                                        'name': params['output_name']+'-MUSCLE_prot.FASTA',
+                                        'label': 'MUSCLE_prot FASTA'
+                                        },
+                                       {'shock_id': output_clw_upload_ret['shock_id'],
+                                        'name': params['output_name']+'-MUSCLE_prot.CLW',
+                                        'label': 'MUSCLE_prot CLUSTALW'
+                                        }]
+
+            # save report object
+            #
+            SERVICE_VER = 'release'
+            reportClient = KBaseReport(self.callbackURL, token=ctx['token'], service_ver=SERVICE_VER)
+            #report_info = report.create({'report':reportObj, 'workspace_name':params['workspace_name']})
+            report_info = reportClient.create_extended_report(reportObj)                                       
+
+        else:  # len(invalid_msgs) > 0
+            reportName = 'muscle_report_'+str(uuid.uuid4())
             report += "FAILURE:\n\n"+"\n".join(invalid_msgs)+"\n"
             reportObj = {
                 'objects_created':[],
                 'text_message':report
                 }
 
-        reportName = 'muscle_report_'+str(uuid.uuid4())
-        ws = workspaceService(self.workspaceURL, token=ctx['token'])
-        report_obj_info = ws.save_objects({
-#                'id':info[6],
-                'workspace':params['workspace_name'],
-                'objects':[
-                    {
-                        'type':'KBaseReport.Report',
-                        'data':reportObj,
-                        'name':reportName,
-                        'meta':{},
-                        'hidden':1,
-                        'provenance':provenance
-                    }
-                ]
-            })[0]
+            ws = workspaceService(self.workspaceURL, token=ctx['token'])
+            report_obj_info = ws.save_objects({
+                    #'id':info[6],
+                    'workspace':params['workspace_name'],
+                    'objects':[
+                        {
+                            'type':'KBaseReport.Report',
+                            'data':reportObj,
+                            'name':reportName,
+                            'meta':{},
+                            'hidden':1,
+                            'provenance':provenance
+                            }
+                        ]
+                    })[0]
+
+            report_info = dict()
+            report_info['name'] = report_obj_info[1]
+            report_info['ref'] = str(report_obj_info[6])+'/'+str(report_obj_info[0])+'/'+str(report_obj_info[4])
 
 
-        self.log(console,"BUILDING RETURN OBJECT")
-        returnVal = { 'report_name': reportName,
-                      'report_ref': str(report_obj_info[6]) + '/' + str(report_obj_info[0]) + '/' + str(report_obj_info[4]),
+        # done
+        returnVal = { 'report_name': report_info['name'],
+                      'report_ref': report_info['ref']
                       }
         self.log(console,"MUSCLE_prot DONE")
 
