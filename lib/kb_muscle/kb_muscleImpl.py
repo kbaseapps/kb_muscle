@@ -440,7 +440,8 @@ class kb_muscle:
                         records_by_fid[this_id] = record
             records = []
             for fId in feature_order:
-                records.append(records_by_fid[new_id[fId]])
+                genomeRef = featureSet_elements[fId][0]
+                records.append(records_by_fid[new_id[genomeRef][fId]])
             SeqIO.write(records, input_forward_reads_file_path, "fasta")
 
 
