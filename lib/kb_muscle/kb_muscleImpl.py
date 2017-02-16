@@ -434,7 +434,8 @@ class kb_muscle:
                     if feature['id'] in these_genomeFeatureIds:
                         #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                         this_id = genomeRef + genome_id_feature_id_delim + feature['id']
-                        row_labels[this_id] = genomeSciName[genomeRef]+' - '+feature['id']
+                        short_feature_id = re.sub("^.*\.?([^\.]+)\.([^\.]+)$", r"\1.\2", feature['id'])
+                        row_labels[this_id] = genomeSciName[genomeRef]+' - '+short_feature_id
 
                         #record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
                         record = SeqRecord(Seq(feature['dna_sequence']), id=this_id, description=genome['id'])
@@ -1051,7 +1052,6 @@ class kb_muscle:
             input_featureSet = data
 
             genomeSciName = {}
-            row_labels = {}
             genome2Features = {}
             featureSet_elements = input_featureSet['elements']
             if 'element_ordering' in input_featureSet and input_featureSet['element_ordering']:
@@ -1083,7 +1083,8 @@ class kb_muscle:
                             #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                             this_id = genomeRef + genome_id_feature_id_delim + feature['id']
                             this_id = re.sub ('\s', '_', this_id)
-                            row_labels[this_id] = genomeSciName[genomeRef]+'-'+feature['id']
+                            short_feature_id = re.sub("^.*\.?([^\.]+)\.([^\.]+)$", r"\1.\2", feature['id'])
+                            row_labels[this_id] = genomeSciName[genomeRef]+' - '+short_feature_id
                             #record = SeqRecord(Seq(feature['protein_translation']), id=feature['id'], description=genome['id'])
                             record = SeqRecord(Seq(feature['protein_translation']), id=this_id, description=genome['id'])
                             proteins_found += 1
