@@ -537,7 +537,8 @@ class kb_muscle:
             if line.startswith('>'):
                 header = line[1:]
                 if row_labels:
-                    this_row_label = re.sub ('\s', '_', row_labels[header])
+                    this_id = leading_chars_pattern.findall(header)[0]
+                    this_row_label = re.sub ('\s', '_', row_labels[this_id])
                     output_fasta_buf.append('>'+this_row_label)
                 else:
                     output_fasta_buf.append(line)
@@ -1179,7 +1180,8 @@ class kb_muscle:
                 if line.startswith('>'):
                     header = line[1:]
                     if row_labels:
-                        this_row_label = re.sub ('\s', '_', row_labels[header])
+                        this_id = leading_chars_pattern.findall(header)[0]
+                        this_row_label = re.sub ('\s', '_', row_labels[this_id])
                         output_fasta_buf.append('>'+this_row_label)
                     else:
                         output_fasta_buf.append(line)
