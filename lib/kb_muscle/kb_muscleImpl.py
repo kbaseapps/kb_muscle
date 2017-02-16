@@ -688,7 +688,10 @@ class kb_muscle:
             aln_pos_by_id = dict()
             for row_id in row_order:
                 aln_pos_by_id[row_id] = 0
-                row_id_disp = row_labels[row_id]
+                if row_labels:
+                    row_id_disp = row_labels[row_id]
+                else:
+                    row_id_disp = row_id
                 if long_id_len < len(row_id_disp):
                     long_id_len = len(row_id_disp)
 
@@ -697,8 +700,11 @@ class kb_muscle:
                 full_row_cnt -= 1
             for chunk_i in range (full_row_cnt + 1):
                 for row_id in row_order:
-                    row_id_disp = re.sub('\s', '_', row_labels[row_id])
-                    for sp_i in range (long_id_len-len(row_id)):
+                    if row_labels:
+                        row_id_disp = re.sub('\s', '_', row_labels[row_id])
+                    else:
+                        row_id_disp = row_id
+                    for sp_i in range (long_id_len-len(row_id_disp)):
                         row_id_disp += ' '
 
                     aln_chunk_upper_bound = (chunk_i+1)*max_row_width
@@ -1331,7 +1337,10 @@ class kb_muscle:
             aln_pos_by_id = dict()
             for row_id in row_order:
                 aln_pos_by_id[row_id] = 0
-                row_id_disp = row_labels[row_id]
+                if row_labels:
+                    row_id_disp = row_labels[row_id]
+                else:
+                    row_id_disp = row_id
                 if long_id_len < len(row_id_disp):
                     long_id_len = len(row_id_disp)
 
@@ -1340,8 +1349,11 @@ class kb_muscle:
                 full_row_cnt -= 1
             for chunk_i in range (full_row_cnt + 1):
                 for row_id in row_order:
-                    row_id_disp = re.sub('\s', '_', row_labels[row_id])
-                    for sp_i in range (long_id_len-len(row_id)):
+                    if row_labels:
+                        row_id_disp = re.sub('\s', '_', row_labels[row_id])
+                    else:
+                        row_id_disp = row_id
+                    for sp_i in range (long_id_len-len(row_id_disp)):
                         row_id_disp += ' '
 
                     aln_chunk_upper_bound = (chunk_i+1)*max_row_width
