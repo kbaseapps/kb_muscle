@@ -265,6 +265,8 @@ class kb_muscle:
 #        report = 'Running MUSCLE_nuc with params='
 #        report += "\n"+pformat(params)
 
+        row_labels = {}
+
 
         #### do some basic checks
         #
@@ -400,7 +402,6 @@ class kb_muscle:
             input_featureSet = data
 
             genomeSciName = {}
-            row_labels = {}
             genome2Features = {}
             new_id = {}
             featureSet_elements = input_featureSet['elements']
@@ -433,7 +434,7 @@ class kb_muscle:
                     if feature['id'] in these_genomeFeatureIds:
                         #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                         this_id = genomeRef + genome_id_feature_id_delim + feature['id']
-                        row_labels[this_id] = genomeSciName[genomeRef]+'-'+feature['id']
+                        row_labels[this_id] = genomeSciName[genomeRef]+' - '+feature['id']
 
                         #record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
                         record = SeqRecord(Seq(feature['dna_sequence']), id=this_id, description=genome['id'])
@@ -513,7 +514,7 @@ class kb_muscle:
                 '\n\n'+ '\n'.join(console))
 
 
-        # Parse the FASTA MSA output
+        # Parse the FASTA MSA output and replace id for txt upload
         #
         self.log(console, 'PARSING MUSCLE MSA FASTA OUTPUT')
         if not os.path.isfile(output_aln_file_path):
@@ -522,6 +523,7 @@ class kb_muscle:
             raise ValueError("created empty file for MUSCLE output: "+output_aln_file_path)
         output_aln_file_handle = open (output_aln_file_path, "r", 0)
 
+        output_fasta_buf = []
         row_order = []
         alignment = {}
         alignment_length = None
@@ -534,6 +536,11 @@ class kb_muscle:
             line = line.rstrip('\n')
             if line.startswith('>'):
                 header = line[1:]
+                if row_labels:
+                    this_row_label = re.sub ('\s', '_', row_labels[header])
+                    output_fasta_buf.append('>'+this_row_label)
+                else:
+                    output_fasta_buf.append(line)
 
                 if last_header != None:
                     last_id = leading_chars_pattern.findall(last_header)[0]
@@ -549,6 +556,7 @@ class kb_muscle:
                 last_seq = ''
             else:
                 last_seq += line
+                output_fasta_buf.append(line)
         if last_header != None:
             last_id = leading_chars_pattern.findall(last_header)[0]
             row_order.append(last_id)
@@ -561,6 +569,10 @@ class kb_muscle:
                 raise ValueError ("unequal alignment row for "+last_header+": '"+last_seq+"'")
         
         output_aln_file_handle.close()
+
+        # write remapped ids
+        with open(output_aln_file_path, 'w', 0) as output_aln_file_handle:
+            output_aln_file_handle.write("\n".join(output_fasta_buf)+"\n")
 
 
         # load the method provenance from the context object
@@ -617,6 +629,8 @@ class kb_muscle:
                       'row_order': row_order,
                       'alignment': alignment
                      }
+            if row_labels:
+                output_MSA['default_row_labels'] = row_labels
 
             new_obj_info = ws.save_objects({
                             'workspace': params['workspace_name'],
@@ -666,22 +680,23 @@ class kb_muscle:
 #                        }
 
             clw_buf = []
-            clw_buf.append ('CLUSTALW '+MSA_name+': '+MSA_description)
+            clw_buf.append ('CLUSTALW format of MUSCLE alignment '+MSA_name+': '+MSA_description)
             clw_buf.append ('')
 
             long_id_len = 0
             aln_pos_by_id = dict()
             for row_id in row_order:
                 aln_pos_by_id[row_id] = 0
-                if long_id_len < len(row_id):
-                    long_id_len = len(row_id)
+                row_id_disp = row_labels[row_id]
+                if long_id_len < len(row_id_disp):
+                    long_id_len = len(row_id_disp)
 
             full_row_cnt = alignment_length // max_row_width
             if alignment_length % max_row_width == 0:
                 full_row_cnt -= 1
             for chunk_i in range (full_row_cnt + 1):
                 for row_id in row_order:
-                    row_id_disp = row_id
+                    row_id_disp = re.sub('\s', '_', row_labels[row_id])
                     for sp_i in range (long_id_len-len(row_id)):
                         row_id_disp += ' '
 
@@ -888,6 +903,8 @@ class kb_muscle:
         report = ''
 #        report = 'Running MUSCLE_prot with params='
 #        report += "\n"+pformat(params)
+
+        row_labels = {}
 
 
         #### do some basic checks
@@ -1148,6 +1165,7 @@ class kb_muscle:
                 raise ValueError("created empty file for MUSCLE output: "+output_aln_file_path)
             output_aln_file_handle = open (output_aln_file_path, "r", 0)
 
+            output_fasta_buf = []
             row_order = []
             alignment = {}
             alignment_length = None
@@ -1160,6 +1178,11 @@ class kb_muscle:
                 line = line.rstrip('\n')
                 if line.startswith('>'):
                     header = line[1:]
+                    if row_labels:
+                        this_row_label = re.sub ('\s', '_', row_labels[header])
+                        output_fasta_buf.append('>'+this_row_label)
+                    else:
+                        output_fasta_buf.append(line)
 
                     if last_header != None:
                         last_id = leading_chars_pattern.findall(last_header)[0]
@@ -1175,6 +1198,7 @@ class kb_muscle:
                     last_seq = ''
                 else:
                     last_seq += line
+                    output_fasta_buf.append(line)
             if last_header != None:
                 last_id = leading_chars_pattern.findall(last_header)[0]
                 row_order.append(last_id)
@@ -1187,6 +1211,10 @@ class kb_muscle:
                     raise ValueError ("unequal alignment row for "+last_header+": '"+last_seq+"'")
         
             output_aln_file_handle.close()
+
+            # write remapped ids
+            with open(output_aln_file_path, 'w', 0) as output_aln_file_handle:
+                output_aln_file_handle.write("\n".join(output_fasta_buf)+"\n")
 
 
         # load the method provenance from the context object
@@ -1243,6 +1271,8 @@ class kb_muscle:
                       'row_order': row_order,
                       'alignment': alignment
                      }
+            if row_labels:
+                output_MSA['default_row_labels'] = row_labels
 
             new_obj_info = ws.save_objects({
                             'workspace': params['workspace_name'],
@@ -1292,22 +1322,23 @@ class kb_muscle:
                             }
 
             clw_buf = []
-            clw_buf.append ('CLUSTALW '+MSA_name+': '+MSA_description)
+            clw_buf.append ('CLUSTALW format of MUSCLE alignment '+MSA_name+': '+MSA_description)
             clw_buf.append ('')
 
             long_id_len = 0
             aln_pos_by_id = dict()
             for row_id in row_order:
                 aln_pos_by_id[row_id] = 0
-                if long_id_len < len(row_id):
-                    long_id_len = len(row_id)
+                row_id_disp = row_labels[row_id]
+                if long_id_len < len(row_id_disp):
+                    long_id_len = len(row_id_disp)
 
             full_row_cnt = alignment_length // max_row_width
             if alignment_length % max_row_width == 0:
                 full_row_cnt -= 1
             for chunk_i in range (full_row_cnt + 1):
                 for row_id in row_order:
-                    row_id_disp = row_id
+                    row_id_disp = re.sub('\s', '_', row_labels[row_id])
                     for sp_i in range (long_id_len-len(row_id)):
                         row_id_disp += ' '
 
