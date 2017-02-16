@@ -434,7 +434,7 @@ class kb_muscle:
                     if feature['id'] in these_genomeFeatureIds:
                         #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                         this_id = genomeRef + genome_id_feature_id_delim + feature['id']
-                        short_feature_id = re.sub("^.*\.?([^\.]+)\.([^\.]+)$", r"\1.\2", feature['id'])
+                        short_feature_id = re.sub("^.*\.([^\.]+)\.([^\.]+)$", r"\1.\2", feature['id'])
                         row_labels[this_id] = genomeSciName[genomeRef]+' - '+short_feature_id
 
                         #record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
@@ -775,7 +775,6 @@ class kb_muscle:
             output_clw_file_path = os.path.join(output_dir, input_name+'-MSA.clw');
             with open (output_clw_file_path, "w", 0) as output_clw_file_handle:
                 output_clw_file_handle.write(clw_buf_str)
-            output_clw_file_handle.close()
 
 
             # upload MUSCLE FASTA output to SHOCK for file_links
@@ -1053,6 +1052,7 @@ class kb_muscle:
 
             genomeSciName = {}
             genome2Features = {}
+            new_id = {}
             featureSet_elements = input_featureSet['elements']
             if 'element_ordering' in input_featureSet and input_featureSet['element_ordering']:
                 feature_order = input_featureSet['element_ordering']
@@ -1062,12 +1062,19 @@ class kb_muscle:
                 genomeRef = featureSet_elements[fId][0]
                 if genomeRef not in genome2Features:
                     genome2Features[genomeRef] = []
-                genome2Features[genomeRef].append(fId)
+                    new_id[genomeRef] = {}
+                if genome_id_feature_id_delim in fId:
+                    [genome_id, feature_id] = fId.split(genome_id_feature_id_delim)
+                else:
+                    feature_id = fId
+                genome2Features[genomeRef].append(feature_id)
+                this_id = genomeRef + genome_id_feature_id_delim + feature_id
+                new_id[genomeRef][fId] = this_id
 
             # export features to FASTA file
             input_forward_reads_file_path = os.path.join(self.scratch, input_name+".fasta")
             self.log(console, 'writing fasta file: '+input_forward_reads_file_path)
-            records = []
+            records_by_fid = dict()
             proteins_found = 0
             for genomeRef in genome2Features:
                 genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
@@ -1083,16 +1090,20 @@ class kb_muscle:
                             #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                             this_id = genomeRef + genome_id_feature_id_delim + feature['id']
                             this_id = re.sub ('\s', '_', this_id)
-                            short_feature_id = re.sub("^.*\.?([^\.]+)\.([^\.]+)$", r"\1.\2", feature['id'])
+                            short_feature_id = re.sub("^.*\.([^\.]+)\.([^\.]+)$", r"\1.\2", feature['id'])
                             row_labels[this_id] = genomeSciName[genomeRef]+' - '+short_feature_id
                             #record = SeqRecord(Seq(feature['protein_translation']), id=feature['id'], description=genome['id'])
                             record = SeqRecord(Seq(feature['protein_translation']), id=this_id, description=genome['id'])
                             proteins_found += 1
-                            records.append(record)
+                            records_by_fid[this_id] = record
 
             if proteins_found < 2:
                 self.log(invalid_msgs,"Less than 2 protein Features (CDS) found.  exiting...")
             else:
+                records = []
+                for fId in feature_order:
+                    genomeRef = featureSet_elements[fId][0]
+                    records.append(records_by_fid[new_id[genomeRef][fId]])
                 SeqIO.write(records, input_forward_reads_file_path, "fasta")
 
         # Missing proper input_input_type
@@ -1424,7 +1435,6 @@ class kb_muscle:
             output_clw_file_path = os.path.join(output_dir, input_name+'-MSA.clw');
             with open (output_clw_file_path, "w", 0) as output_clw_file_handle:
                 output_clw_file_handle.write(clw_buf_str)
-            output_clw_file_handle.close()
 
 
             # upload MUSCLE FASTA output to SHOCK for file_links
