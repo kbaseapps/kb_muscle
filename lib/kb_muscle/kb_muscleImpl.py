@@ -393,29 +393,54 @@ class kb_muscle:
         # FeatureSet
         #
         elif input_type_name == 'FeatureSet':
+            
+            genome_id_feature_id_delim = '.f:'
+
             # retrieve sequences for features
             input_featureSet = data
 
+            genomeSciName = {}
+            row_labels = {}
             genome2Features = {}
-            features = input_featureSet['elements']
-            for fId in features.keys():
-                genomeRef = features[fId][0]
+            new_id = {}
+            featureSet_elements = input_featureSet['elements']
+            if 'element_ordering' in input_featureSet and input_featureSet['element_ordering']:
+                feature_order = input_featureSet['element_ordering']
+            else:
+                feature_order = featureSet_elements.keys().sort()
+            for fId in feature_order:
+                genomeRef = featureSet_elements[fId][0]
                 if genomeRef not in genome2Features:
                     genome2Features[genomeRef] = []
-                genome2Features[genomeRef].append(fId)
+                    new_id[genomeRef] = {}
+                if genome_id_feature_id_delim in fId:
+                    [genome_id, feature_id] = fId.split(genome_id_feature_id_delim)
+                else:
+                    feature_id = fId
+                genome2Features[genomeRef].append(feature_id)
+                this_id = genomeRef + genome_id_feature_id_delim + feature_id
+                new_id[genomeRef][fId] = this_id
 
             # export features to FASTA file
             input_forward_reads_file_path = os.path.join(self.scratch, input_name+".fasta")
             self.log(console, 'writing fasta file: '+input_forward_reads_file_path)
-            records = []
+            records_by_fid = dict()
             for genomeRef in genome2Features:
                 genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
+                genomeSciName[genomeRef] = genome['scientific_name']
                 these_genomeFeatureIds = genome2Features[genomeRef]
                 for feature in genome['features']:
                     if feature['id'] in these_genomeFeatureIds:
                         #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
-                        record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
-                        records.append(record)
+                        this_id = genomeRef + genome_id_feature_id_delim + feature['id']
+                        row_labels[this_id] = genomeSciName[genomeRef]+'-'+feature['id']
+
+                        #record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
+                        record = SeqRecord(Seq(feature['dna_sequence']), id=this_id, description=genome['id'])
+                        records_by_fid[this_id] = record
+            records = []
+            for fId in feature_order:
+                records.append(records_by_fid[new_id[fId]])
             SeqIO.write(records, input_forward_reads_file_path, "fasta")
 
 
@@ -513,7 +538,7 @@ class kb_muscle:
                     last_id = leading_chars_pattern.findall(last_header)[0]
                     row_order.append(last_id)
                     #self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
-                    report += last_id+"\t"+last_seq+"\n"
+                    #report += last_id+"\t"+last_seq+"\n"
                     alignment[last_id] = last_seq
                     if alignment_length == None:
                         alignment_length = len(last_seq)
@@ -527,7 +552,7 @@ class kb_muscle:
             last_id = leading_chars_pattern.findall(last_header)[0]
             row_order.append(last_id)
             #self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
-            report += last_id+"\t"+last_seq+"\n"
+            #report += last_id+"\t"+last_seq+"\n"
             alignment[last_id] = last_seq
             if alignment_length == None:
                 alignment_length = len(last_seq)
@@ -994,13 +1019,22 @@ class kb_muscle:
         #
 #        elif input_type_name == 'FeatureSet':
         if input_type_name == 'FeatureSet':
+            
+            genome_id_feature_id_delim = '.f:'
+
             # retrieve sequences for features
             input_featureSet = data
 
+            genomeSciName = {}
+            row_labels = {}
             genome2Features = {}
-            features = input_featureSet['elements']
-            for fId in features.keys():
-                genomeRef = features[fId][0]
+            featureSet_elements = input_featureSet['elements']
+            if 'element_ordering' in input_featureSet and input_featureSet['element_ordering']:
+                feature_order = input_featureSet['element_ordering']
+            else:
+                feature_order = featureSet_elements.keys().sort()
+            for fId in feature_order:
+                genomeRef = featureSet_elements[fId][0]
                 if genomeRef not in genome2Features:
                     genome2Features[genomeRef] = []
                 genome2Features[genomeRef].append(fId)
@@ -1012,21 +1046,21 @@ class kb_muscle:
             proteins_found = 0
             for genomeRef in genome2Features:
                 genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
+                genomeSciName[genomeRef] = genome['scientific_name']
                 these_genomeFeatureIds = genome2Features[genomeRef]
                 for feature in genome['features']:
                     if feature['id'] in these_genomeFeatureIds:
-                        #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
-                        #record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
-                        #if feature['protein_translation'] != 'CDS':
-                        #    self.log(console,"attempt to include non-CDS Feature "+feature['id'])
-                        #    self.log(invalid_msgs,"attempt to include non-CDS Feature "+feature['id'])
-                        #    continue
                         if 'protein_translation' not in feature or feature['protein_translation'] == None:
                             self.log(console,"bad CDS Feature "+feature['id']+": no protein_translation found")
                             self.log(invalid_msgs,"bad CDS Feature "+feature['id']+": no protein_translation found")
                             continue
                         else:
-                            record = SeqRecord(Seq(feature['protein_translation']), id=feature['id'], description=genome['id'])
+                            #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
+                            this_id = genomeRef + genome_id_feature_id_delim + feature['id']
+                            this_id = re.sub ('\s', '_', this_id)
+                            row_labels[this_id] = genomeSciName[genomeRef]+'-'+feature['id']
+                            #record = SeqRecord(Seq(feature['protein_translation']), id=feature['id'], description=genome['id'])
+                            record = SeqRecord(Seq(feature['protein_translation']), id=this_id, description=genome['id'])
                             proteins_found += 1
                             records.append(record)
 
@@ -1130,7 +1164,7 @@ class kb_muscle:
                         last_id = leading_chars_pattern.findall(last_header)[0]
                         row_order.append(last_id)
                         #self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
-                        report += last_id+"\t"+last_seq+"\n"
+                        #report += last_id+"\t"+last_seq+"\n"
                         alignment[last_id] = last_seq
                         if alignment_length == None:
                             alignment_length = len(last_seq)
@@ -1144,7 +1178,7 @@ class kb_muscle:
                 last_id = leading_chars_pattern.findall(last_header)[0]
                 row_order.append(last_id)
                 #self.log(console,"ID: '"+last_id+"'\nALN: '"+last_seq+"'")  # DEBUG
-                report += last_id+"\t"+last_seq+"\n"
+                #report += last_id+"\t"+last_seq+"\n"
                 alignment[last_id] = last_seq
                 if alignment_length == None:
                     alignment_length = len(last_seq)
