@@ -58,9 +58,9 @@ class kb_muscle:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.1"
-    GIT_URL = "https://github.com/kbaseapps/kb_muscle.git"
-    GIT_COMMIT_HASH = "d30a3d23ddd5769d9455ae5e1dc0f570a688457f"
+    VERSION = "0.0.2"
+    GIT_URL = "https://github.com/kbaseapps/kb_muscle"
+    GIT_COMMIT_HASH = "d59879abdc0745704557def6ddd23bbd034b047b"
 
     #BEGIN_CLASS_HEADER
     workspaceURL     = None
