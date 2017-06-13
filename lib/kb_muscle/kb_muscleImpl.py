@@ -1057,13 +1057,7 @@ class kb_muscle:
             if 'element_ordering' in input_featureSet and input_featureSet['element_ordering']:
                 feature_order = input_featureSet['element_ordering']
             else:
-                feature_order = featureSet_elements.keys().sort()
-            print "DEBUG - Ojbect-0"
-	    print objects[0]
-            print data
-            print input_featureSet
-            print "Ordered"
-            print feature_order
+                feature_order = sorted(featureSet_elements.keys())
             for fId in feature_order:
                 genomeRef = featureSet_elements[fId][0]
                 if genomeRef not in genome2Features:
