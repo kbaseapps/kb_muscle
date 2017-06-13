@@ -1063,7 +1063,7 @@ class kb_muscle:
             print data
             print input_featureSet
             print "Ordered"
-            print feature_order:
+            print feature_order
             for fId in feature_order:
                 genomeRef = featureSet_elements[fId][0]
                 if genomeRef not in genome2Features:
