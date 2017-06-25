@@ -4,6 +4,8 @@ import os  # noqa: F401
 import json  # noqa: F401
 import time
 import requests
+import uuid
+import re
 
 from os import environ
 try:
@@ -75,15 +77,125 @@ class kb_muscleTest(unittest.TestCase):
     def getContext(self):
         return self.__class__.ctx
 
-    # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    def test_your_method(self):
-        # Prepare test objects in workspace if needed using
-        # self.getWsClient().save_objects({'workspace': self.getWsName(),
-        #                                  'objects': []})
-        #
-        # Run your method by
-        # ret = self.getImpl().your_method(self.getContext(), parameters...)
-        #
-        # Check returned data with
-        # self.assertEqual(ret[...], ...) or other unittest methods
+
+    #### MUSCLE_nuc_01()
+    ##
+    def test_MUSCLE_nuc_01(self):
+
+        reference_prok_genomes_WS = 'ReferenceDataManager'  # PROD and CI
+        genome_refs = [
+            reference_prok_genomes_WS+'/GCF_001566335.1/1',  # E. coli K-12 MG1655
+            reference_prok_genomes_WS+'/GCF_000021385.1/1',  # D. vulgaris str. 'Miyazaki F'
+            reference_prok_genomes_WS+'/GCF_001721825.1/1',  # Pseudomonas aeruginosa
+            reference_prok_genomes_WS+'/GCF_000020845.1/1'  # Vibrio fischeri MJ11
+        ]
+        # DnaA
+        feature_ids = [ 
+            'AWN69_RS07145',
+            'DVMF_RS00005',
+            'A6701_RS00005',
+            'VFMJ11_RS07145'
+        ]
+
+        featureSet_obj = { 'description': 'test genomeSet',
+                           'element_ordering': [],
+                           'elements': {}
+                        }
+        for i,genome_ref in enumerate(genome_refs):
+            feature_id = feature_ids[i]
+            featureSet_obj['element_ordering'].append(feature_id)
+            featureSet_obj['elements'][feature_id] = [genome_ref]
+
+        provenance = [{}]
+        featureSet_info = self.getWsClient().save_objects({
+            'workspace': self.getWsName(), 
+            'objects': [
+                {
+                    'type': 'KBaseCollections.FeatureSet',
+                    'data': featureSet_obj,
+                    'name': 'test_featureSet',
+                    'meta': {},
+                    'provenance': provenance
+                }
+            ]})[0]
+
+        [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+        featureSet_ref = str(featureSet_info[WSID_I])+'/'+str(featureSet_info[OBJID_I])+'/'+str(featureSet_info[VERSION_I])
+
+        output_dir = os.path.join(self.scratch,'fasta_out.'+str(uuid.uuid4()))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        parameters = {
+                'desc':           'test MUSCLE nuc',
+                'input_ref':      featureSet_ref,
+                'output_name':    'test_MUSCLE_nuc',
+                'maxiters':       '16',
+                'maxhours':       '0.5',
+                'workspace_name': self.getWsName()
+                }
+        ret = self.getImpl().MUSCLE_nuc(self.getContext(), parameters)[0]
+        self.assertIsNotNone(ret['report_ref'])
         pass
+        
+
+    #### MUSCLE_prot_01()
+    ##
+    def test_MUSCLE_prot_01(self):
+
+        reference_prok_genomes_WS = 'ReferenceDataManager'  # PROD and CI
+        genome_refs = [
+            reference_prok_genomes_WS+'/GCF_001566335.1/1',  # E. coli K-12 MG1655
+            reference_prok_genomes_WS+'/GCF_000021385.1/1',  # D. vulgaris str. 'Miyazaki F'
+            reference_prok_genomes_WS+'/GCF_001721825.1/1',  # Pseudomonas aeruginosa
+            reference_prok_genomes_WS+'/GCF_000020845.1/1'  # Vibrio fischeri MJ11
+        ]
+        # DnaA
+        feature_ids = [ 
+            'AWN69_RS07145',
+            'DVMF_RS00005',
+            'A6701_RS00005',
+            'VFMJ11_RS07145'
+        ]
+
+        featureSet_obj = { 'description': 'test genomeSet',
+                           'element_ordering': [],
+                           'elements': {}
+                        }
+        for i,genome_ref in enumerate(genome_refs):
+            feature_id = feature_ids[i]
+            featureSet_obj['element_ordering'].append(feature_id)
+            featureSet_obj['elements'][feature_id] = [genome_ref]
+
+        provenance = [{}]
+        featureSet_info = self.getWsClient().save_objects({
+            'workspace': self.getWsName(), 
+            'objects': [
+                {
+                    'type': 'KBaseCollections.FeatureSet',
+                    'data': featureSet_obj,
+                    'name': 'test_featureSet',
+                    'meta': {},
+                    'provenance': provenance
+                }
+            ]})[0]
+
+        [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+        featureSet_ref = str(featureSet_info[WSID_I])+'/'+str(featureSet_info[OBJID_I])+'/'+str(featureSet_info[VERSION_I])
+
+        output_dir = os.path.join(self.scratch,'fasta_out.'+str(uuid.uuid4()))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        parameters = {
+                'desc':           'test MUSCLE nuc',
+                'input_ref':      featureSet_ref,
+                'output_name':    'test_MUSCLE_prot',
+                'maxiters':       '16',
+                'maxhours':       '0.5',
+                'workspace_name': self.getWsName()
+                }
+        ret = self.getImpl().MUSCLE_prot(self.getContext(), parameters)[0]
+        self.assertIsNotNone(ret['report_ref'])
+        pass
+        
