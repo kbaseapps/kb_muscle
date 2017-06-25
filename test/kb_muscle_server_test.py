@@ -81,6 +81,8 @@ class kb_muscleTest(unittest.TestCase):
     #### MUSCLE_nuc_01()
     ##
     def test_MUSCLE_nuc_01(self):
+        obj_out_name = 'test_MUSCLE_nuc'
+        obj_out_type = 'KBaseTrees.MSA'
 
         reference_prok_genomes_WS = 'ReferenceDataManager'  # PROD and CI
         genome_refs = [
@@ -129,19 +131,30 @@ class kb_muscleTest(unittest.TestCase):
         parameters = {
                 'desc':           'test MUSCLE nuc',
                 'input_ref':      featureSet_ref,
-                'output_name':    'test_MUSCLE_nuc',
+                'output_name':    obj_out_name,
                 'maxiters':       '16',
                 'maxhours':       '0.5',
                 'workspace_name': self.getWsName()
                 }
         ret = self.getImpl().MUSCLE_nuc(self.getContext(), parameters)[0]
         self.assertIsNotNone(ret['report_ref'])
+
+        # check created obj
+        #report_obj = self.getWsClient().get_objects2({'objects':[{'ref':ret['report_ref']}]})[0]['data']
+        report_obj = self.getWsClient().get_objects([{'ref':ret['report_ref']}])[0]['data']
+        self.assertIsNotNone(report_obj['objects_created'][0]['ref'])
+
+        created_obj_0_info = self.getWsClient().get_object_info_new({'objects':[{'ref':report_obj['objects_created'][0]['ref']}]})[0]
+        self.assertEqual(created_obj_0_info[NAME_I], obj_out_name)
+        self.assertEqual(created_obj_0_info[TYPE_I].split('-')[0], obj_out_type)
         pass
         
 
     #### MUSCLE_prot_01()
     ##
     def test_MUSCLE_prot_01(self):
+        obj_out_name = 'test_MUSCLE_prot'
+        obj_out_type = 'KBaseTrees.MSA'
 
         reference_prok_genomes_WS = 'ReferenceDataManager'  # PROD and CI
         genome_refs = [
@@ -190,12 +203,20 @@ class kb_muscleTest(unittest.TestCase):
         parameters = {
                 'desc':           'test MUSCLE nuc',
                 'input_ref':      featureSet_ref,
-                'output_name':    'test_MUSCLE_prot',
+                'output_name':    obj_out_name,
                 'maxiters':       '16',
                 'maxhours':       '0.5',
                 'workspace_name': self.getWsName()
                 }
         ret = self.getImpl().MUSCLE_prot(self.getContext(), parameters)[0]
         self.assertIsNotNone(ret['report_ref'])
+
+        # check created obj
+        #report_obj = self.getWsClient().get_objects2({'objects':[{'ref':ret['report_ref']}]})[0]['data']
+        report_obj = self.getWsClient().get_objects([{'ref':ret['report_ref']}])[0]['data']
+        self.assertIsNotNone(report_obj['objects_created'][0]['ref'])
+
+        created_obj_0_info = self.getWsClient().get_object_info_new({'objects':[{'ref':report_obj['objects_created'][0]['ref']}]})[0]
+        self.assertEqual(created_obj_0_info[NAME_I], obj_out_name)
+        self.assertEqual(created_obj_0_info[TYPE_I].split('-')[0], obj_out_type)
         pass
-        
