@@ -7,8 +7,8 @@ tooltip: |
 
 screenshots:
 
-    - MUSCLE_nuc_input_widget.png
-    - MUSCLE_nuc_output_widget.png
+    - MUSCLE_prot_input_widget.png
+    - MUSCLE_prot_output_widget.png
 
 icon: muscle-cyan.png
 
