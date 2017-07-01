@@ -3,8 +3,12 @@
 #
 name: MUSCLE Multiple Sequence Alignment (Protein) - v3.8.425
 tooltip: |
-    Build Multiple Sequence Alignment (MSA) for protein sequences with MUSCLE.  Only genes that code for proteins will be included.
-screenshots: []
+    Build Multiple Sequence Alignment (MSA) for protein sequences with MUSCLE.
+
+screenshots:
+
+    - MUSCLE_nuc_input_widget.png
+    - MUSCLE_nuc_output_widget.png
 
 icon: muscle-cyan.png
 
@@ -59,3 +63,19 @@ description : |
     <p>This method builds a Multiple Sequence Alignment (MSA) of protein sequences with MUSCLE.</p>
     <p>MUSCLE 3.8.425 from http://www.drive5.com/muscle/</p>
     <p>Please cite: <A HREF="http://nar.oxfordjournals.org/content/32/5/1792.full.pdf+html">Edgar, R.C. (2004) MUSCLE: multiple sequence alignment with high accuracy and high throughput.Nucleic Acids Res. 32(5):1792-1797.</A> doi:10.1093/nar/gkh340</p>
+    <p><hr></p>
+    <p><i>Implemented for KBase by <a href="https://github.com/dcchivian">Dylan Chivian</a> (<a href="mailto:DCChivian@lbl.gov">DCChivian@lbl.gov</a>)</i></p>
+    <p><hr></p>
+    <p>MUSCLE performs a multiple sequence alignment (MSA).  The KBase implementation takes a FeatureSet object with a list of genes, extracts the sequences, and performs the alignment.  The MSA can be downloaded as Clustal and FASTA format.  The MSA is also stored as an MSA data object in KBase for downstream analysis such as Phylogenetic Tree building.</p>
+    <p><hr></p>
+    <p><b>Configuration:</b></p>
+    <p><b><i>Input Features:</i></b> The set of genes to align.  The protein translations will be used, so only genes that code for proteins will be included.</p>
+    <p><b><i>MSA Description:</i></b> Record any description of the contents.</p>
+    <p><b><i>Max Iterations:</i></b> Bound iterations if MUSCLE fails to converge.</p>
+    <p><b><i>Max Hours:</i></b> Bound time if MUSCLE fails to converge.  Hours are decimal (e.g. enter "0.5" for 30 minutes).</p>
+    <p><b><i>Output MSA:</i></b> Name of the output MSA object to save in Narrative.</p>
+    <p><hr></p>
+    <p><b>Output:</b></p>
+    <p><b><i>Output Object:</i></b> The output object is an MSA object.  This contains the alignment, labels for the rows, and the description.</p>
+    <p><b><i>Output Visualization:</i></b> The MSA is shown in Clustal format.</p>
+    <p><b><i>Downloadable files:</i></b> The MSA may be downloaded as Clustal and FASTA.</p>
