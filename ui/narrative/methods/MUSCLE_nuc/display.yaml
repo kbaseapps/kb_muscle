@@ -1,7 +1,7 @@
 #
 # define display information
 #
-name: MUSCLE Multiple Sequence Alignment (DNA) - v3.8.425 
+name: MUSCLE Multiple Sequence Alignment (DNA) - v3.8.425
 tooltip: |
     Build Multiple Sequence Alignment (MSA) for nucleotide sequences with MUSCLE.
 screenshots:
@@ -60,9 +60,6 @@ parameters :
 
 description : |
     <p>This method builds a Multiple Sequence Alignment (MSA) of protein sequences with MUSCLE.</p>
-    <p>MUSCLE 3.8.425 from http://www.drive5.com/muscle/</p>
-    <p>Please cite: <A HREF="http://nar.oxfordjournals.org/content/32/5/1792.full.pdf+html">Edgar, R.C. (2004) MUSCLE: multiple sequence alignment with high accuracy and high throughput.Nucleic Acids Res. 32(5):1792-1797.</A> doi:10.1093/nar/gkh340</p>
-    <p><hr></p>
     <p><i>Implemented for KBase by <a href="https://github.com/dcchivian">Dylan Chivian</a> (<a href="mailto:DCChivian@lbl.gov">DCChivian@lbl.gov</a>)</i></p>
     <p><hr></p>
     <p>MUSCLE performs a multiple sequence alignment (MSA).  The KBase implementation takes a FeatureSet object with a list of genes, extracts the sequences, and performs the alignment.  The MSA can be downloaded as Clustal and FASTA format.  The MSA is also stored as an MSA data object in KBase for downstream analysis such as Phylogenetic Tree building.</p>
@@ -78,3 +75,14 @@ description : |
     <p><b><i>Output Object:</i></b> The output object is an MSA object.  This contains the alignment, labels for the rows, and the description.</p>
     <p><b><i>Output Visualization:</i></b> The MSA is shown in Clustal format.</p>
     <p><b><i>Downloadable files:</i></b> The MSA may be downloaded as Clustal and FASTA.</p>
+
+publications :
+    -
+        display-text: |
+            Edgar RC. MUSCLE: multiple sequence alignment with high accuracy and high throughput. Nucleic Acids Res. 2004;32: 1792–1797. doi:10.1093/nar/gkh340
+        link: https://academic.oup.com/nar/article/32/5/1792/2380623
+
+    -
+        display-text: |
+            MUSCLE 3.8.425 from
+        link: http://www.drive5.com/muscle/
