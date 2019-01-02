@@ -815,10 +815,7 @@ class kb_muscle:
                                     'description':'MUSCLE_nuc MSA'}],
                 #'message': '',
                 'message': clw_buf_str,
-                'direct_html': '',
-                'direct_html_index': None,
                 'file_links': [],
-                'html_links': [],
                 'workspace_name': params['workspace_name'],
                 'report_object_name': reportName
                 }
@@ -1475,10 +1472,7 @@ class kb_muscle:
                                     'description':'MUSCLE_prot MSA'}],
                 #'message': '',
                 'message': clw_buf_str,
-                'direct_html': '',
-                'direct_html_index': None,
                 'file_links': [],
-                'html_links': [],
                 'workspace_name': params['workspace_name'],
                 'report_object_name': reportName
                 }
