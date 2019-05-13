@@ -10,7 +10,7 @@
         "input": null,
         "output": "no-display"
     },
-    "parameters": [ 
+    "parameters": [
         {
             "id": "desc",
             "optional": false,
@@ -30,7 +30,7 @@
             "default_values": [ "" ],
             "field_type": "text",
             "text_options": {
-                "valid_ws_types": [ "KBaseFile.SingleEndLibrary","KBaseAssembly.SingleEndLibrary","KBaseCollections.FeatureSet" ]
+                "valid_ws_types": [ "KBaseCollections.FeatureSet" ]
             }
         },
         {
@@ -42,7 +42,7 @@
             "field_type": "text",
             "text_options": {
                 "valid_ws_types": [ "KBaseTrees.MSA" ],
-		"is_output_name": true		  
+		"is_output_name": true
             }
         },
         {
