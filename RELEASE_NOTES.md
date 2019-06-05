@@ -1,3 +1,9 @@
+### Version 1.0.4
+- updated to python 3
+
+### Version 1.0.3
+- updated base image to sdkbase2
+
 ### Version 1.0.2
 - changed citations to PLOS format 
 

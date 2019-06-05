@@ -1,24 +1,15 @@
 # -*- coding: utf-8 -*-
-import unittest
 import os  # noqa: F401
-import json  # noqa: F401
 import time
-import requests
+import unittest
 import uuid
-import re
-
+from configparser import ConfigParser  # py3
 from os import environ
-try:
-    from ConfigParser import ConfigParser  # py2
-except:
-    from configparser import ConfigParser  # py3
 
-from pprint import pprint  # noqa: F401
-
-from biokbase.workspace.client import Workspace as workspaceService
+from installed_clients.WorkspaceClient import Workspace as workspaceService
+from kb_muscle.authclient import KBaseAuth as _KBaseAuth
 from kb_muscle.kb_muscleImpl import kb_muscle
 from kb_muscle.kb_muscleServer import MethodContext
-from kb_muscle.authclient import KBaseAuth as _KBaseAuth
 
 
 class kb_muscleTest(unittest.TestCase):
@@ -121,7 +112,7 @@ class kb_muscleTest(unittest.TestCase):
                 }
             ]})[0]
 
-        [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+        [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = list(range(11))  # object_info tuple
         featureSet_ref = str(featureSet_info[WSID_I])+'/'+str(featureSet_info[OBJID_I])+'/'+str(featureSet_info[VERSION_I])
 
         output_dir = os.path.join(self.scratch,'fasta_out.'+str(uuid.uuid4()))
@@ -193,7 +184,7 @@ class kb_muscleTest(unittest.TestCase):
                 }
             ]})[0]
 
-        [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+        [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = list(range(11))  # object_info tuple
         featureSet_ref = str(featureSet_info[WSID_I])+'/'+str(featureSet_info[OBJID_I])+'/'+str(featureSet_info[VERSION_I])
 
         output_dir = os.path.join(self.scratch,'fasta_out.'+str(uuid.uuid4()))
