@@ -3,11 +3,10 @@
 #
 name: MUSCLE Multiple Sequence Alignment (Protein) - v3.8.425
 tooltip: |
-    Build Multiple Sequence Alignment (MSA) for protein sequences with MUSCLE.
+    Build a Multiple Sequence Alignment (MSA) for protein sequences using MUSCLE.
 
 screenshots:
 
-    - MUSCLE_prot_input_widget.png
     - MUSCLE_prot_output_widget.png
 
 icon: muscle-cyan.png
@@ -35,47 +34,52 @@ parameters :
         ui-name : |
             MSA Description
         short-hint : |
-            Describe Contents of the Output MSA
+            Enter a description for the output MSA.
         placeholder: |
             Enter Description
     input_ref:
         ui-name : |
-            Input Features
+            Input Sequences
         short-hint : |
-            Features that code for PROTEIN sequences.  Data type is FeatureSet.
+            Select the set of input protein sequences.
     output_name:
         ui-name : |
-            Output MSA
+            Output MSA Name
         short-hint : |
-            Multiple Sequence Alignment output.  Data type is MSA.
+            Enter a name for the MSA output object to be generated.
     maxiters:
         ui-name : |
             Max Iterations
         short-hint : |
-            Limit iterations even if not converged (default: 16)
+            The maximum iterations even if not converged (default is 16).
     maxhours:
         ui-name : |
             Max Hours
         short-hint : |
-            Limit time MUSCLE will run (default: 30 min)
+            The maximum hours MUSCLE will run (defualt is 30 minutes).
 
 description : |
-    <p>This method builds a Multiple Sequence Alignment (MSA) of protein sequences with MUSCLE.</p>
-    <p><i>Implemented for KBase by <a href="https://github.com/dcchivian">Dylan Chivian</a> (<a href="mailto:DCChivian@lbl.gov">DCChivian@lbl.gov</a>)</i></p>
-    <p><hr></p>
-    <p>MUSCLE performs a multiple sequence alignment (MSA).  The KBase implementation takes a FeatureSet object with a list of genes, extracts the sequences, and performs the alignment.  The MSA can be downloaded as Clustal and FASTA format.  The MSA is also stored as an MSA data object in KBase for downstream analysis such as Phylogenetic Tree building.</p>
-    <p><hr></p>
-    <p><b>Configuration:</b></p>
-    <p><b><i>Input Features:</i></b> The set of genes to align.  The protein translations will be used, so only genes that code for proteins will be included.</p>
-    <p><b><i>MSA Description:</i></b> Record any description of the contents.</p>
-    <p><b><i>Max Iterations:</i></b> Bound iterations if MUSCLE fails to converge.</p>
-    <p><b><i>Max Hours:</i></b> Bound time if MUSCLE fails to converge.  Hours are decimal (e.g. enter "0.5" for 30 minutes).</p>
-    <p><b><i>Output MSA:</i></b> Name of the output MSA object to save in Narrative.</p>
-    <p><hr></p>
+    <p>This App builds a Multiple Sequence Alignment (MSA) of protein sequences with MUSCLE. MUSCLE is one of the most widely-used methods in biology. It performs an MSA and does so, according to their website, “with accuracy and speed that are consistently better than CLUSTALW”. The KBase implementation takes a FeatureSet object with a list of genes, extracts the sequences, and performs the alignment. The MSA can then be downloaded in FASTA and Clustal format. The MSA is also stored as an MSA data object in KBase for downstream analysis Apps like <a href=”https://narrative.kbase.us/#catalog/apps/kb_fasttree/run_FastTree/release”>FASTTREE-2 Phylogenetic Tree building</a>.</p>
+
+    <p><b>Inputs and Parameters:</b></p>
+    <ul>
+      <li>Input Features: The KBase FeatureSet object with protein-coding genes to align. The FeatureSet can be built with <a href=”https://narrative.kbase.us/#catalog/apps/FeatureSetUtils/build_feature_set/aeec07a3dc538b31071cdf1642cb9c346bfb35a2”>Build Feature Set from Genome</a>, <a href=”https://narrative.kbase.us/#catalog/apps/kb_SetUtilities/KButil_Merge_FeatureSet_Collection/73dd817a7ddab6c2615d2e6e6a145a32e1a4db64”>Merge FeatureSets</a>, and/or <a href=”https://narrative.kbase.us/#catalog/apps/kb_SetUtilities/KButil_Logical_Slice_Two_FeatureSets/73dd817a7ddab6c2615d2e6e6a145a32e1a4db64”>Logical Slice Two FeatureSets</a>. FeatureSets are also created as output from BLAST and HMMER Apps.</li>
+      <li>MSA Description: A description for the output object is mandatory. It is part of the object download but serves no other purpose.</li>
+      <li>Max Iterations: The upper bound for the number of iterations if MUSCLE fails to converge.</li>
+      <li>Max Hours: The upper bound for the number of hours if MUSCLE fails to converge. Hours are in decimal format (e.g. enter "0.5" for 30 minutes).</li>
+      <li>Output MSA: The name of the generated output MSA object to save in your Narrative.</li>
+    </ul>
+    </p>
+
     <p><b>Output:</b></p>
-    <p><b><i>Output Object:</i></b> The output object is an MSA object.  This contains the alignment, labels for the rows, and the description.</p>
-    <p><b><i>Output Visualization:</i></b> The MSA is shown in Clustal format.</p>
-    <p><b><i>Downloadable files:</i></b> The MSA may be downloaded as Clustal and FASTA.</p>
+    <ul>
+      <li>Output MSA:</i></b> An output MSA object is created for use in subsequent analysis. This object contains the alignment sequences, the labels for the rows, the row order, and the description.</li>
+      <li>Output Visualization:</i></b> The MSA is shown in Clustal format.</li>
+      <li>Links to Downloadable files:</i></b> Two MSA file formats are automatically created for download (Clustal and FASTA formats).</li>
+    </ul>
+    </p>
+
+    <p><strong>Team members who implemented algorithm in KBase:</strong> Dylan Chivian. For questions, please <a href=”http://kbase.us/contact-us/”>contact us</a>.</p>
 
 publications :
     -
@@ -85,5 +89,5 @@ publications :
 
     -
         display-text: |
-            MUSCLE 3.8.425 from
+            MUSCLE 3.8.425 Source:
         link: http://www.drive5.com/muscle/
