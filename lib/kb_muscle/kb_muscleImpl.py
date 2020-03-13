@@ -1,42 +1,25 @@
 # -*- coding: utf-8 -*-
 #BEGIN_HEADER
+import gzip
 import os
-import sys
-import shutil
-import hashlib
-import subprocess
-import requests
 import re
+import subprocess
+import sys
 import traceback
 import uuid
 from datetime import datetime
-from pprint import pprint, pformat
-import numpy as np
-import gzip
+from pprint import pformat
 
+import requests
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import generic_protein
-from biokbase.workspace.client import Workspace as workspaceService
 from requests_toolbelt import MultipartEncoder
-from biokbase.AbstractHandle.Client import AbstractHandle as HandleService
-from DataFileUtil.DataFileUtilClient import DataFileUtil as DFUClient
-from KBaseReport.KBaseReportClient import KBaseReport
 
-# KBase Data API
-#from doekbase.data_api.annotation.genome_annotation.api import GenomeAnnotationAPI as GenomeAnnotationAPI
-    
-# Standard setup for accessing Data API
-#services = {"workspace_service_url": "https://ci.kbase.us/services/ws/",
-#            "shock_service_url": "https://ci.kbase.us/services/shock-api/"}
-#token = os.environ["KB_AUTH_TOKEN"]
-
-
-# silence whining
-import requests
-requests.packages.urllib3.disable_warnings()
-
+from installed_clients.AbstractHandleClient import AbstractHandle as HandleService
+from installed_clients.DataFileUtilClient import DataFileUtil as DFUClient
+from installed_clients.KBaseReportClient import KBaseReport
+from installed_clients.WorkspaceClient import Workspace as workspaceService
 #END_HEADER
 
 
@@ -58,9 +41,9 @@ class kb_muscle:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.0.3"
-    GIT_URL = "https://github.com/kbaseapps/kb_muscle"
-    GIT_COMMIT_HASH = "bd7d7e785bda6dc1cdb128404cddd5bb9c8888d6"
+    VERSION = "1.0.4"
+    GIT_URL = "https://github.com/kbaseapps/kb_muscle.git"
+    GIT_COMMIT_HASH = "99bd50f5eeab00f42c734396db9c426e041a76fd"
 
     #BEGIN_CLASS_HEADER
     workspaceURL     = None
@@ -328,7 +311,7 @@ class kb_muscle:
 
                 ### NOTE: this section is what could be replaced by the transform services
                 input_forward_reads_file_path = os.path.join(self.scratch,input_forward_reads['file_name'])
-                input_forward_reads_file_handle = open(input_forward_reads_file_path, 'w', 0)
+                input_forward_reads_file_handle = open(input_forward_reads_file_path, 'w')
                 self.log(console, 'downloading reads file: '+str(input_forward_reads_file_path))
                 headers = {'Authorization': 'OAuth '+ctx['token']}
                 r = requests.get(input_forward_reads['url']+'/node/'+input_forward_reads['id']+'?download', stream=True, headers=headers)
@@ -341,8 +324,8 @@ class kb_muscle:
 
                 # remove carriage returns
                 new_file_path = input_forward_reads_file_path+"-CRfree"
-                new_file_handle = open(new_file_path, 'w', 0)
-                input_forward_reads_file_handle = open(input_forward_reads_file_path, 'r', 0)
+                new_file_handle = open(new_file_path, 'w')
+                input_forward_reads_file_handle = open(input_forward_reads_file_path, 'r')
                 for line in input_forward_reads_file_handle:
                     line = re.sub("\r","",line)
                     new_file_handle.write(line)
@@ -352,11 +335,11 @@ class kb_muscle:
 
                 # convert FASTQ to FASTA (if necessary)
                 new_file_path = input_forward_reads_file_path+".fna"
-                new_file_handle = open(new_file_path, 'w', 0)
+                new_file_handle = open(new_file_path, 'w')
                 if input_forward_reads_file_compression == 'gz':
-                    input_forward_reads_file_handle = gzip.open(input_forward_reads_file_path, 'r', 0)
+                    input_forward_reads_file_handle = gzip.open(input_forward_reads_file_path, 'r')
                 else:
-                    input_forward_reads_file_handle = open(input_forward_reads_file_path, 'r', 0)
+                    input_forward_reads_file_handle = open(input_forward_reads_file_path, 'r')
                 header = None
                 last_header = None
                 last_seq_buf = None
@@ -408,7 +391,7 @@ class kb_muscle:
             if 'element_ordering' in input_featureSet and input_featureSet['element_ordering']:
                 feature_order = input_featureSet['element_ordering']
             else:
-                feature_order = featureSet_elements.keys().sort()
+                feature_order = sorted(featureSet_elements.keys())
             for fId in feature_order:
                 genomeRef = featureSet_elements[fId][0]
                 if genomeRef not in genome2Features:
@@ -450,7 +433,7 @@ class kb_muscle:
         # Missing proper input_input_type
         #
         else:
-            raise ValueError('Cannot yet handle input_ref type of: '+type_name)
+            raise ValueError('Cannot yet handle input_ref type of: '+input_type_name)
 
 
         ### Construct the command
@@ -503,7 +486,7 @@ class kb_muscle:
                              shell = False)
 
         while True:
-            line = p.stdout.readline()
+            line = p.stdout.readline().decode()
             if not line: break
             self.log(console, line.replace('\n', ''))
 
@@ -522,7 +505,7 @@ class kb_muscle:
             raise ValueError("failed to create MUSCLE output: "+output_aln_file_path)
         elif not os.path.getsize(output_aln_file_path) > 0:
             raise ValueError("created empty file for MUSCLE output: "+output_aln_file_path)
-        output_aln_file_handle = open (output_aln_file_path, "r", 0)
+        output_aln_file_handle = open (output_aln_file_path, 'r')
 
         output_fasta_buf = []
         row_order = []
@@ -573,7 +556,7 @@ class kb_muscle:
         output_aln_file_handle.close()
 
         # write remapped ids
-        with open(output_aln_file_path, 'w', 0) as output_aln_file_handle:
+        with open(output_aln_file_path, 'w') as output_aln_file_handle:
             output_aln_file_handle.write("\n".join(output_fasta_buf)+"\n")
 
 
@@ -745,7 +728,7 @@ class kb_muscle:
                                 break
                         if not strong:
                             weak = False
-                            if weak_groups != None:
+                            if weak_groups is not None:
                                 for weak_group in weak_groups.keys():
                                     this_weak_group = True
                                     for seen_char in col_chars.keys():
@@ -772,8 +755,8 @@ class kb_muscle:
 
             # write clw to file
             clw_buf_str = "\n".join(clw_buf)+"\n"
-            output_clw_file_path = os.path.join(output_dir, input_name+'-MSA.clw');
-            with open (output_clw_file_path, "w", 0) as output_clw_file_handle:
+            output_clw_file_path = os.path.join(output_dir, input_name+'-MSA.clw')
+            with open (output_clw_file_path, 'w') as output_clw_file_handle:
                 output_clw_file_handle.write(clw_buf_str)
 
 
@@ -815,10 +798,7 @@ class kb_muscle:
                                     'description':'MUSCLE_nuc MSA'}],
                 #'message': '',
                 'message': clw_buf_str,
-                'direct_html': '',
-                'direct_html_index': None,
                 'file_links': [],
-                'html_links': [],
                 'workspace_name': params['workspace_name'],
                 'report_object_name': reportName
                 }
@@ -975,35 +955,35 @@ class kb_muscle:
 
                 ### NOTE: this section is what could be replaced by the transform services
                 input_forward_reads_file_path = os.path.join(self.scratch,input_forward_reads['file_name'])
-                input_forward_reads_file_handle = open(input_forward_reads_file_path, 'w', 0)
+                input_forward_reads_file_handle = open(input_forward_reads_file_path, 'w')
                 self.log(console, 'downloading reads file: '+str(input_forward_reads_file_path))
                 headers = {'Authorization': 'OAuth '+ctx['token']}
                 r = requests.get(input_forward_reads['url']+'/node/'+input_forward_reads['id']+'?download', stream=True, headers=headers)
                 for chunk in r.iter_content(1024):
                     input_forward_reads_file_handle.write(chunk)
-                input_forward_reads_file_handle.close();
+                input_forward_reads_file_handle.close()
                 self.log(console, 'done')
                 ### END NOTE
 
 
                 # remove carriage returns
                 new_file_path = input_forward_reads_file_path+"-CRfree"
-                new_file_handle = open(new_file_path, 'w', 0)
-                input_forward_reads_file_handle = open(input_forward_reads_file_path, 'r', 0)
+                new_file_handle = open(new_file_path, 'w')
+                input_forward_reads_file_handle = open(input_forward_reads_file_path, 'r')
                 for line in input_forward_reads_file_handle:
                     line = re.sub("\r","",line)
                     new_file_handle.write(line)
-                input_forward_reads_file_handle.close();
+                input_forward_reads_file_handle.close()
                 new_file_handle.close()
                 input_forward_reads_file_path = new_file_path
 
                 # convert FASTQ to FASTA (if necessary)
                 new_file_path = input_forward_reads_file_path+".fna"
-                new_file_handle = open(new_file_path, 'w', 0)
+                new_file_handle = open(new_file_path, 'w')
                 if input_forward_reads_file_compression == 'gz':
-                    input_forward_reads_file_handle = gzip.open(input_forward_reads_file_path, 'r', 0)
+                    input_forward_reads_file_handle = gzip.open(input_forward_reads_file_path, 'r')
                 else:
-                    input_forward_reads_file_handle = open(input_forward_reads_file_path, 'r', 0)
+                    input_forward_reads_file_handle = open(input_forward_reads_file_path, 'r')
                 header = None
                 last_header = None
                 last_seq_buf = None
@@ -1109,7 +1089,7 @@ class kb_muscle:
         # Missing proper input_input_type
         #
         else:
-            raise ValueError('Cannot yet handle input_ref type of: '+type_name)
+            raise ValueError('Cannot yet handle input_ref type of: '+input_type_name)
 
 
         ### Construct the command
@@ -1132,7 +1112,7 @@ class kb_muscle:
             output_dir = os.path.join(self.scratch,'output.'+str(timestamp))
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            output_aln_file_path = os.path.join(output_dir, params['output_name']+'-MSA.fasta');
+            output_aln_file_path = os.path.join(output_dir, params['output_name']+'-MSA.fasta')
             file_extension = ''
 
             muscle_cmd.append('-in')
@@ -1163,7 +1143,7 @@ class kb_muscle:
                              shell = False)
 
             while True:
-                line = p.stdout.readline()
+                line = p.stdout.readline().decode()
                 if not line: break
                 self.log(console, line.replace('\n', ''))
 
@@ -1182,7 +1162,7 @@ class kb_muscle:
                 raise ValueError("failed to create MUSCLE output: "+output_aln_file_path)
             elif not os.path.getsize(output_aln_file_path) > 0:
                 raise ValueError("created empty file for MUSCLE output: "+output_aln_file_path)
-            output_aln_file_handle = open (output_aln_file_path, "r", 0)
+            output_aln_file_handle = open (output_aln_file_path, 'r')
 
             output_fasta_buf = []
             row_order = []
@@ -1233,7 +1213,7 @@ class kb_muscle:
             output_aln_file_handle.close()
 
             # write remapped ids
-            with open(output_aln_file_path, 'w', 0) as output_aln_file_handle:
+            with open(output_aln_file_path, 'w') as output_aln_file_handle:
                 output_aln_file_handle.write("\n".join(output_fasta_buf)+"\n")
 
 
@@ -1405,7 +1385,7 @@ class kb_muscle:
                                 break
                         if not strong:
                             weak = False
-                            if weak_groups != None:
+                            if weak_groups is not None:
                                 for weak_group in weak_groups.keys():
                                     this_weak_group = True
                                     for seen_char in col_chars.keys():
@@ -1432,8 +1412,8 @@ class kb_muscle:
 
             # write clw to file
             clw_buf_str = "\n".join(clw_buf)+"\n"
-            output_clw_file_path = os.path.join(output_dir, input_name+'-MSA.clw');
-            with open (output_clw_file_path, "w", 0) as output_clw_file_handle:
+            output_clw_file_path = os.path.join(output_dir, input_name+'-MSA.clw')
+            with open (output_clw_file_path, 'w') as output_clw_file_handle:
                 output_clw_file_handle.write(clw_buf_str)
 
 
@@ -1475,10 +1455,7 @@ class kb_muscle:
                                     'description':'MUSCLE_prot MSA'}],
                 #'message': '',
                 'message': clw_buf_str,
-                'direct_html': '',
-                'direct_html_index': None,
                 'file_links': [],
-                'html_links': [],
                 'workspace_name': params['workspace_name'],
                 'report_object_name': reportName
                 }
