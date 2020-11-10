@@ -605,7 +605,7 @@ class kb_muscle:
                             genome_disp_name = genomeObjName[genomeRef]
                             row_labels[this_id] = genome_disp_name+' - '+short_feature_id
 
-                            record = SeqRecord(Seq(feature['dna_sequence']), id=this_id, description=genomeObjName)
+                            record = SeqRecord(Seq(feature['dna_sequence']), id=this_id, description=genomeObjName[genomeRef])
                             records_by_fid[this_id] = record
 
                 else:
@@ -1331,7 +1331,7 @@ class kb_muscle:
                             genome_disp_name = genomeObjName[genomeRef]
                             row_labels[this_id] = genome_disp_name+' - '+short_feature_id
 
-                            record = SeqRecord(Seq(prot_translation), id=this_id, description=genomeObjName)
+                            record = SeqRecord(Seq(prot_translation), id=this_id, description=genomeObjName[genomeRef])
                             proteins_found += 1
                             records_by_fid[this_id] = record
 
