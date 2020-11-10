@@ -7,6 +7,7 @@ import subprocess
 import sys
 import traceback
 import uuid
+import json
 from datetime import datetime
 from pprint import pformat
 
