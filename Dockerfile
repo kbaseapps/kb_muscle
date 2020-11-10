@@ -1,5 +1,5 @@
 FROM kbase/sdkbase2:python
-MAINTAINER KBase Developer [Dylan Chivian (DCChivian@lbl.gov)]
+MAINTAINER KBase Developer
 # -----------------------------------------
 # In this section, you can install any system dependencies required
 # to run your App.  For instance, you could place an apt-get update or
@@ -16,6 +16,10 @@ RUN mkdir -p /kb/module/muscle/bin && \
     tar xfz muscle3.8.425_binaries.tar.gz && \
     ln -s muscle3.8.425_i86linux64 muscle && \
     rm muscle3.8.425_binaries.tar.gz 
+
+# -----------------------------------------
+
+
 
 # -----------------------------------------
 

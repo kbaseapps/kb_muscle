@@ -46,6 +46,11 @@ parameters :
             Output MSA Name
         short-hint : |
             Enter a name for the MSA output object to be generated.
+    genome_disp_name_config :
+        ui-name : |
+            Display genome as
+        short-hint : |
+            Use the object name, object version, and/or scientific name of the Genome in the function profile report
     maxiters:
         ui-name : |
             Max Iterations
@@ -59,10 +64,12 @@ parameters :
 
 description : |
     <p>This App builds a Multiple Sequence Alignment (MSA) of nucleotide sequences with MUSCLE. MUSCLE is one of the most widely-used methods in biology. It performs an MSA and does so, according to their website, “with accuracy and speed that are consistently better than CLUSTALW”. The KBase implementation takes a FeatureSet object with a list of DNA references, extracts the sequences, and performs the alignment. The MSA can then be downloaded in FASTA and Clustal format. The MSA is also stored as an MSA data object in KBase for downstream analysis Apps such as <a href=”https://narrative.kbase.us/#catalog/apps/kb_fasttree/run_FastTree/release”>FASTTREE-2 Phylogenetic Tree Builder</a>.</p>
+    <p>The MUSCLE nucleotide app can also accept a SingleEndLibrary or AssemblySet object as the input to align.  If the sequence is an AssemblySet, make sure that each Assembly contains one and only one contig, and that the contigs themselves are not too long (such as for viral assemblies).</p>
 
     <p><b>Inputs and Parameters:</b></p>
     <ul>
-      <li>Input Sequences: The KBase object with the set of sequences to align. A KBase FeatureSet object is composed of protein-coding genes, and their corresponding mRNA gene sequences (untranslated sequences) will be retrieved from their source genomes as input. The FeatureSet can be built with <a href=”https://narrative.kbase.us/#catalog/apps/FeatureSetUtils/build_feature_set/aeec07a3dc538b31071cdf1642cb9c346bfb35a2”>Build Feature Set from Genome</a>, <a href=”https://narrative.kbase.us/#catalog/apps/kb_SetUtilities/KButil_Merge_FeatureSet_Collection/73dd817a7ddab6c2615d2e6e6a145a32e1a4db64”>Merge FeatureSets</a>, and/or <a href=”https://narrative.kbase.us/#catalog/apps/kb_SetUtilities/KButil_Logical_Slice_Two_FeatureSets/73dd817a7ddab6c2615d2e6e6a145a32e1a4db64”>Logical Slice Two FeatureSets</a>. FeatureSets are also created as output from BLAST and HMMER Apps.</li>
+      <li>Input Sequences: The KBase object with the set of sequences to align. A KBase FeatureSet object is composed of protein-coding genes, and their corresponding mRNA gene sequences (untranslated sequences) will be retrieved from their source genomes as input. The FeatureSet can be built with <a href=”https://narrative.kbase.us/#catalog/apps/FeatureSetUtils/build_feature_set/aeec07a3dc538b31071cdf1642cb9c346bfb35a2”>Build Feature Set from Genome</a>, <a href=”https://narrative.kbase.us/#catalog/apps/kb_SetUtilities/KButil_Merge_FeatureSet_Collection/73dd817a7ddab6c2615d2e6e6a145a32e1a4db64”>Merge FeatureSets</a>, and/or <a href=”https://narrative.kbase.us/#catalog/apps/kb_SetUtilities/KButil_Logical_Slice_Two_FeatureSets/73dd817a7ddab6c2615d2e6e6a145a32e1a4db64”>Logical Slice Two FeatureSets</a>. FeatureSets are also created as output from BLAST and HMMER Apps.  Typically protein sequence is used to align protein coding genes, but this App might be used if the genes are very closely related and primarily differ at the nucleotide level.  Alternatively, RNA encoding genes like tRNA and rRNA, or promoter and TF-binding sites need to be aligned using the nucleotide sequences.</li>
+      
       <li>MSA Description: A description for the output object is mandatory. It is part of the object download but serves no other purpose.</li>
       <li>Max Iterations:</i></b> The upper bound for the number of iterations if MUSCLE fails to converge.</li>
       <li>Max Hours: The upper bound for the number of hours to run if MUSCLE fails to converge. Hours are in decimal format (e.g. enter "0.5" for 30 minutes).</li>

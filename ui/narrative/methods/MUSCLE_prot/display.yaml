@@ -47,6 +47,11 @@ parameters :
             Output MSA Name
         short-hint : |
             Enter a name for the MSA output object to be generated.
+    genome_disp_name_config :
+        ui-name : |
+            Display genome as
+        short-hint : |
+            Use the object name, object version, and/or scientific name of the Genome in the function profile report
     maxiters:
         ui-name : |
             Max Iterations
