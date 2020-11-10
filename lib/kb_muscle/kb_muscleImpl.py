@@ -89,7 +89,7 @@ class kb_muscle:
         #protein_file_path = os.path.join (this_scratch_dir, 'protein.fasta')
 
         try:
-            dfu = DataFileUtil (self.callbackURL)
+            dfu = DFUClient (self.callbackURL)
         except Exception as e:
             raise ValueError('Unable to connect to DFU: ' + str(e))
 
