@@ -80,6 +80,48 @@ class kb_muscle:
         pass
 
 
+    # Translation
+    def TranslateNucToProtSeq(self, ctx, params):
+        if 'nuc_seq' not in params or params['nuc_seq'] == None or params['nuc_seq'] == '':
+            raise ValueError('Method TranslateNucToProtSeq() requires nuc_seq parameter')
+        if 'genetic_code' not in params or params['genetic_code'] == None or params['genetic_code'] == '':
+            params['genetic_code'] = '11'
+
+        if params['genetic_code'] != '11':
+            raise ValueError('Method TranslateNucToProtSeq() only knows genetic code 11')
+        
+        nuc_seq = params['nuc_seq'].upper()
+        prot_seq = ''
+
+        genetic_code = params['genetic_code']
+        genetic_code_table = dict()
+        genetic_code_table['11'] = {
+            'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
+            'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
+            'AAC':'N', 'AAT':'N', 'AAA':'K', 'AAG':'K',
+            'AGC':'S', 'AGT':'S', 'AGA':'R', 'AGG':'R',
+            'CTA':'L', 'CTC':'L', 'CTG':'L', 'CTT':'L',
+            'CCA':'P', 'CCC':'P', 'CCG':'P', 'CCT':'P',
+            'CAC':'H', 'CAT':'H', 'CAA':'Q', 'CAG':'Q',
+            'CGA':'R', 'CGC':'R', 'CGG':'R', 'CGT':'R',
+            'GTA':'V', 'GTC':'V', 'GTG':'V', 'GTT':'V',
+            'GCA':'A', 'GCC':'A', 'GCG':'A', 'GCT':'A',
+            'GAC':'D', 'GAT':'D', 'GAA':'E', 'GAG':'E',
+            'GGA':'G', 'GGC':'G', 'GGG':'G', 'GGT':'G',
+            'TCA':'S', 'TCC':'S', 'TCG':'S', 'TCT':'S',
+            'TTC':'F', 'TTT':'F', 'TTA':'L', 'TTG':'L',
+            'TAC':'Y', 'TAT':'Y', 'TAA':'_', 'TAG':'_',
+            'TGC':'C', 'TGT':'C', 'TGA':'_', 'TGG':'W'
+            }
+        if genetic_code not in genetic_code_table:
+            raise ValueError ("genetic code '"+str(genetic_code)+"' not configured in genetic_code_table")
+
+        prot_seq = ''.join([genetic_code_table[genetic_code].get(nuc_seq[3*i:3*i+3],'X') for i in range(len(nuc_seq)//3)])
+        if prot_seq.endswith('_'):
+            prot_seq = prot_seq.rstrip('_')
+
+        return prot_seq
+
     # AMA_METHODS
     #def _get_ama_features_as_json (self, features_handle_ref, gff_handle_ref, protein_handle_ref):
     def _get_ama_features_as_json (self, features_handle_ref):
@@ -172,6 +214,9 @@ class kb_muscle:
         features_json = self._get_ama_features_as_json (features_handle_ref)
 
         return features_json
+
+    
+
     
 
     # Helper script borrowed from the transform service, logger removed
@@ -1237,7 +1282,6 @@ class kb_muscle:
                     for feature in genome['features']:
                         if feature['id'] in these_genomeFeatureIds:
                             if 'protein_translation' not in feature or feature['protein_translation'] == None:
-                                self.log(console,"bad CDS Feature "+feature['id']+": no protein_translation found")
                                 self.log(invalid_msgs,"bad CDS Feature "+feature['id']+": no protein_translation found")
                                 continue
                             else:
@@ -1270,16 +1314,24 @@ class kb_muscle:
                     ama_features = self._get_features_from_AnnotatedMetagenomeAssembly (ctx, genomeRef)
                     for feature in ama_features:
                         if feature['id'] in these_genomeFeatureIds:
-                            if not feature.get('protein_translatkon'):
-                                self.log(console,"bad CDS Feature "+feature['id']+": no protein_translation found")
-                                self.log(invalid_msgs,"bad CDS Feature "+feature['id']+": no protein_translation found")
+                            if not feature.get('type'):
+                                raise ValueError ("No type for AMA feature "+feature['id'])
+                            if feature['type'] != 'CDS':
+                                self.log ("skipping non-CDS AMA feature "+feature['id'])
                                 continue
+                            if not feature.get('protein_translatkon'):
+                                self.log(console,"AMA CDS Feature "+feature['id']+": no protein_translation found.  Auto-translatiing from dna_sequence")
+                                prot_translation = self.TranslateNucToProtSeq(ctx,
+                                                                              {'nuc_seq': feature['dna_sequence'],
+                                                                               'genetic_code': '11'})
+                            else:
+                                prot_translation = feature['protein_translation']
                             this_id = genomeRef + genome_id_feature_id_delim + feature['id']
                             short_feature_id = re.sub("^.*\.([^\.]+)\.([^\.]+)$", r"\1.\2", feature['id'])
                             genome_disp_name = genomeObjName[genomeRef]
                             row_labels[this_id] = genome_disp_name+' - '+short_feature_id
 
-                            record = SeqRecord(Seq(feature['protein_translation']), id=this_id, description=genomeObjName)
+                            record = SeqRecord(Seq(prot_translation), id=this_id, description=genomeObjName)
                             proteins_found += 1
                             records_by_fid[this_id] = record
 
