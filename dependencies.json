@@ -3,11 +3,23 @@
   "type" : "core",
   "file_path" : "https://raw.githubusercontent.com/kbase/handle_service/master/handle_service.spec"
 }, {
+  "module_name" : "AssemblyUtil",
+  "type" : "sdk",
+  "version_tag" : "release"
+}, {
   "module_name" : "DataFileUtil",
   "type" : "sdk",
   "version_tag" : "release"
 }, {
+  "module_name" : "kb_ObjectUtilities",
+  "type" : "sdk",
+  "version_tag" : "release"
+}, {
   "module_name" : "KBaseReport",
+  "type" : "sdk",
+  "version_tag" : "release"
+}, {
+  "module_name" : "SetAPI",
   "type" : "sdk",
   "version_tag" : "release"
 }, {

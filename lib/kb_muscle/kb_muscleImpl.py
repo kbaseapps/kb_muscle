@@ -20,6 +20,9 @@ from installed_clients.AbstractHandleClient import AbstractHandle as HandleServi
 from installed_clients.DataFileUtilClient import DataFileUtil as DFUClient
 from installed_clients.KBaseReportClient import KBaseReport
 from installed_clients.WorkspaceClient import Workspace as workspaceService
+from installed_clients.SetAPIServiceClient import SetAPI
+from installed_clients.AssemblyUtilClient import AssemblyUtil
+from installed_clients.kb_ObjectUtilitiesClient import kb_ObjectUtilities
 #END_HEADER
 
 
@@ -41,9 +44,9 @@ class kb_muscle:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "1.0.4"
-    GIT_URL = "https://github.com/kbaseapps/kb_muscle.git"
-    GIT_COMMIT_HASH = "99bd50f5eeab00f42c734396db9c426e041a76fd"
+    VERSION = "1.1.0"
+    GIT_URL = "https://github.com/kbaseapps/kb_muscle"
+    GIT_COMMIT_HASH = "75ddcaca75c16869aed8333da9da0648187b5747"
 
     #BEGIN_CLASS_HEADER
     workspaceURL     = None
@@ -75,6 +78,100 @@ class kb_muscle:
     def get_genome_set_feature_seqs(self, ws_data, ws_info):
         pass
 
+
+    # AMA_METHODS
+    #def _get_ama_features_as_json (self, features_handle_ref, gff_handle_ref, protein_handle_ref):
+    def _get_ama_features_as_json (self, features_handle_ref):
+        this_id = str(uuid.uuid4())
+        this_scratch_dir = os.path.join (self.scratch, this_id)
+        json_features_file_path = os.path.join (this_scratch_dir, 'features.json')
+        #gff_file_path = os.path.join (this_scratch_dir, 'genes.gff')
+        #protein_file_path = os.path.join (this_scratch_dir, 'protein.fasta')
+
+        try:
+            dfu = DataFileUtil (self.callbackURL)
+        except Exception as e:
+            raise ValueError('Unable to connect to DFU: ' + str(e))
+
+        try:
+            dfu.shock_to_file({'handle_id': features_handle_ref,
+                               'file_path': json_features_file_path+'.gz',
+                               'unpack': 'uncompress'
+                           })
+        except Exception as e:
+            raise ValueError('Unable to fetch AnnotatedMetagenomeAssembly features from SHOCK: ' + str(e))
+        """
+        try:
+            dfu.shock_to_file({'handle_id': gff_handle_ref,
+                               'file_path': gff_file_path+'.gz',
+                               'unpack': 'uncompress'
+                           })
+        except Exception as e:
+            raise ValueError('Unable to fetch AnnotatedMetagenomeAssembly gffs from SHOCK: ' + str(e))
+
+        try:
+            dfu.shock_to_file({'handle_id': protein_handle_ref,
+                               'file_path': protein_file_path+'.gz',
+                               'unpack': 'uncompress'
+                           })
+        except Exception as e:
+            raise ValueError('Unable to fetch AnnotatedMetagenomeAssembly protein FASTA from SHOCK: ' + str(e))
+        """
+
+        # DEBUG
+        """
+        print ("SCRATCH CONTENTS")
+        sys.stdout.flush()
+        for this_file in os.listdir (this_scratch_dir):
+            print ("\t"+this_file)
+            sys.stdout.flush()
+
+        buf = []
+        #with open(json_features_file_path, 'r') as f:
+        with open(protein_file_path, 'r') as f:
+            for line in f.readlines():
+                buf.append (line)
+            #features_json = json.load(f)
+
+        print ("FEATURES_JSON:\n"+"\n".join(buf))
+        sys.stdout.flush()
+        """
+        
+        with open(json_features_file_path, 'r') as f:
+            features_json = json.load(f)
+
+
+        os.remove(json_features_file_path+'.gz')
+        os.remove(json_features_file_path)
+        #os.remove(gff_file_path+'.gz')
+        #os.remove(gff_file_path)
+        #os.remove(protein_file_path+'.gz')
+        #os.remove(protein_file_path)
+
+        return features_json
+
+
+    def _get_features_from_AnnotatedMetagenomeAssembly(self, ctx, ama_ref):
+
+        # get ama object
+        try:
+            ws = workspaceService(self.workspaceURL, token=ctx['token'])
+            ama_object = ws.get_objects2({'objects':[{'ref':ama_ref}]})['data'][0]
+            ama_object_data = ama_object['data']
+            ama_object_info = ama_object['info']
+        except Exception as e:
+            raise ValueError('Unable to fetch AnnotatedMetagenomeAssembly object from workspace: ' + str(e))
+        #to get the full stack trace: traceback.format_exc()
+
+        # get features from json
+        features_handle_ref = ama_object_data['features_handle_ref']
+        #gff_handle_ref = ama_object_data['gff_handle_ref']
+        #protein_handle_ref = ama_object_data['protein_handle_ref']
+        #features_json = self._get_ama_features_as_json (features_handle_ref, gff_handle_ref, protein_handle_ref)
+        features_json = self._get_ama_features_as_json (features_handle_ref)
+
+        return features_json
+    
 
     # Helper script borrowed from the transform service, logger removed
     #
@@ -196,7 +293,7 @@ class kb_muscle:
         self.workspaceURL = config['workspace-url']
         self.shockURL = config['shock-url']
         self.handleURL = config['handle-service-url']
-        self.serviceWizardURL = config['service-wizard-url']
+        self.serviceWizardURL = config['srv-wiz-url']
 
         self.callbackURL = os.environ.get('SDK_CALLBACK_URL')
         if self.callbackURL == None:
@@ -221,9 +318,11 @@ class kb_muscle:
         **    overloading as follows:
         **        input_ref: SingleEndLibrary (just MUSCLE_nuc), FeatureSet (both)
         **        output_name: MSA
-        :param params: instance of type "MUSCLE_Params" (MUSCLE Input Params)
-           -> structure: parameter "workspace_name" of type "workspace_name"
-           (** The workspace object refs are of form: ** **    objects =
+        :param params: instance of type "MUSCLE_Params" (MUSCLE Input Params
+           ** ** MUSCLE_prot(): input_ref must be FeatureSet ** MUSCLE_nuc():
+           input_ref must be FeatureSet, SingleEndLibrary, or AssemblySet) ->
+           structure: parameter "workspace_name" of type "workspace_name" (**
+           The workspace object refs are of form: ** **    objects =
            ws.get_objects([{'ref':
            params['workspace_id']+'/'+params['obj_name']}]) ** ** "ref" means
            the entire name combining the workspace id and the object name **
@@ -232,7 +331,8 @@ class kb_muscle:
            of a workspace or object.  This is received from Narrative.),
            parameter "desc" of String, parameter "input_ref" of type
            "data_obj_ref", parameter "output_name" of type "data_obj_name",
-           parameter "maxiters" of Long, parameter "maxhours" of Double
+           parameter "genome_disp_name_config" of String, parameter
+           "maxiters" of Long, parameter "maxhours" of Double
         :returns: instance of type "MUSCLE_Output" (MUSCLE Output) ->
            structure: parameter "report_name" of type "data_obj_name",
            parameter "report_ref" of type "data_obj_ref"
@@ -247,7 +347,9 @@ class kb_muscle:
         report = ''
 #        report = 'Running MUSCLE_nuc with params='
 #        report += "\n"+pformat(params)
-
+        [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I,
+         WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+        
         row_labels = {}
 
 
@@ -384,6 +486,8 @@ class kb_muscle:
             # retrieve sequences for features
             input_featureSet = data
 
+            genomeObjName = {}
+            genomeObjVer  = {}
             genomeSciName = {}
             genome2Features = {}
             new_id = {}
@@ -410,31 +514,85 @@ class kb_muscle:
             self.log(console, 'writing fasta file: '+input_forward_reads_file_path)
             records_by_fid = dict()
             for genomeRef in genome2Features:
-                genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
-                genomeSciName[genomeRef] = genome['scientific_name']
+                genome_obj = ws.get_objects([{'ref':genomeRef}])[0]
+                genome_type = re.sub('-[0-9]+\.[0-9]+$', "", genome_obj['info'][TYPE_I])
+                genomeObjName[genomeRef] = genome_obj['info'][NAME_I]
+                genomeObjVer[genomeRef]  = genome_obj['info'][VERSION_I]
                 these_genomeFeatureIds = genome2Features[genomeRef]
-                for feature in genome['features']:
-                    if feature['id'] in these_genomeFeatureIds:
-                        #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
-                        this_id = genomeRef + genome_id_feature_id_delim + feature['id']
-                        short_feature_id = re.sub("^.*\.([^\.]+)\.([^\.]+)$", r"\1.\2", feature['id'])
-                        row_labels[this_id] = genomeSciName[genomeRef]+' - '+short_feature_id
 
-                        #record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
-                        record = SeqRecord(Seq(feature['dna_sequence']), id=this_id, description=genome['id'])
-                        records_by_fid[this_id] = record
+                # Genome
+                if genome_type == 'KBaseGenomes.Genome':
+                    genome = genome_obj['data']
+                    genomeSciName[genomeRef] = genome['scientific_name']
+                    for feature in genome['features']:
+                        if feature['id'] in these_genomeFeatureIds:
+                            #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
+                            this_id = genomeRef + genome_id_feature_id_delim + feature['id']
+                            short_feature_id = re.sub("^.*\.([^\.]+)\.([^\.]+)$", r"\1.\2", feature['id'])
+                            genome_disp_name = ''
+                            if 'obj_name' in params.get('genome_disp_name_config'):
+                                genome_disp_name += genomeObjName[genomeRef]
+                                if 'ver' in params.get('genome_disp_name_config'):
+                                    genome_disp_name += '.v'+str(genomeObjVer[genomeRef])
+
+                                if genome_type == "KBaseGenomes.Genome" and \
+                                   'sci_name' in params.get('genome_disp_name_config'):
+                                    genome_disp_name += ': '+genomeSciName[genomeRef]
+                            else:
+                                genome_disp_name = genomeObjName[genomeRef]
+                
+                            row_labels[this_id] = genome_disp_name+' - '+short_feature_id
+
+                            #record = SeqRecord(Seq(feature['dna_sequence']), id=feature['id'], description=genome['id'])
+                            record = SeqRecord(Seq(feature['dna_sequence']), id=this_id, description=genome['id'])
+                            records_by_fid[this_id] = record
+                            
+                # AnnotatedMetagenomeAssembly
+                elif genome_type == 'KBaseMetagenomes.AnnotatedMetagenomeAssembly':
+                    ama_features = self._get_features_from_AnnotatedMetagenomeAssembly (ctx, genomeRef)
+                    for feature in ama_features:
+                        if feature['id'] in these_genomeFeatureIds:
+                            if not feature.get('dna_sequence'):
+                                raise ValueError("bad feature "+feature['id']+": No dna_sequence field.")
+                            this_id = genomeRef + genome_id_feature_id_delim + feature['id']
+                            short_feature_id = re.sub("^.*\.([^\.]+)\.([^\.]+)$", r"\1.\2", feature['id'])
+                            genome_disp_name = genomeObjName[genomeRef]
+                            row_labels[this_id] = genome_disp_name+' - '+short_feature_id
+
+                            record = SeqRecord(Seq(feature['dna_sequence']), id=this_id, description=genomeObjName)
+                            records_by_fid[this_id] = record
+
+                else:
+                    raise ValueError ("unable to handle feature from object type: "+genome_type)
+
+
             records = []
             for fId in feature_order:
                 genomeRef = featureSet_elements[fId][0]
                 records.append(records_by_fid[new_id[genomeRef][fId]])
             SeqIO.write(records, input_forward_reads_file_path, "fasta")
 
-
         # Missing proper input_input_type
         #
         else:
             raise ValueError('Cannot yet handle input_ref type of: '+input_type_name)
 
+        """
+        # AssemblySet
+        #
+        elif input_type_name == 'AssemblySet':
+            try:
+                SetAPI_Client = SetAPI(self.serviceWizardURL, token=ctx['token'])
+            except Exception as e:
+                raise ValueError ("unable to instantiate SetAPI Client")
+            try:
+                auClient = AssemblyUtil(self.callbackURL, token=ctx['token'])
+            except Exception as e:
+                raise ValueError ("unable to instantiate AssemblyUtil Client")
+
+            # HERE
+        """
+        
 
         ### Construct the command
         #
@@ -864,9 +1022,11 @@ class kb_muscle:
 
     def MUSCLE_prot(self, ctx, params):
         """
-        :param params: instance of type "MUSCLE_Params" (MUSCLE Input Params)
-           -> structure: parameter "workspace_name" of type "workspace_name"
-           (** The workspace object refs are of form: ** **    objects =
+        :param params: instance of type "MUSCLE_Params" (MUSCLE Input Params
+           ** ** MUSCLE_prot(): input_ref must be FeatureSet ** MUSCLE_nuc():
+           input_ref must be FeatureSet, SingleEndLibrary, or AssemblySet) ->
+           structure: parameter "workspace_name" of type "workspace_name" (**
+           The workspace object refs are of form: ** **    objects =
            ws.get_objects([{'ref':
            params['workspace_id']+'/'+params['obj_name']}]) ** ** "ref" means
            the entire name combining the workspace id and the object name **
@@ -875,7 +1035,8 @@ class kb_muscle:
            of a workspace or object.  This is received from Narrative.),
            parameter "desc" of String, parameter "input_ref" of type
            "data_obj_ref", parameter "output_name" of type "data_obj_name",
-           parameter "maxiters" of Long, parameter "maxhours" of Double
+           parameter "genome_disp_name_config" of String, parameter
+           "maxiters" of Long, parameter "maxhours" of Double
         :returns: instance of type "MUSCLE_Output" (MUSCLE Output) ->
            structure: parameter "report_name" of type "data_obj_name",
            parameter "report_ref" of type "data_obj_ref"
@@ -890,7 +1051,9 @@ class kb_muscle:
         report = ''
 #        report = 'Running MUSCLE_prot with params='
 #        report += "\n"+pformat(params)
-
+        [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I,
+         WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+        
         row_labels = {}
 
 
@@ -1030,6 +1193,8 @@ class kb_muscle:
             # retrieve sequences for features
             input_featureSet = data
 
+            genomeObjName = {}
+            genomeObjVer  = {}
             genomeSciName = {}
             genome2Features = {}
             new_id = {}
@@ -1057,26 +1222,67 @@ class kb_muscle:
             records_by_fid = dict()
             proteins_found = 0
             for genomeRef in genome2Features:
-                genome = ws.get_objects([{'ref':genomeRef}])[0]['data']
-                genomeSciName[genomeRef] = genome['scientific_name']
+                genome_obj = ws.get_objects([{'ref':genomeRef}])[0]
+                genome_type = re.sub('-[0-9]+\.[0-9]+$', "", genome_obj['info'][TYPE_I])
+                genomeObjName[genomeRef] = genome_obj['info'][NAME_I]
+                genomeObjVer[genomeRef]  = genome_obj['info'][VERSION_I]
                 these_genomeFeatureIds = genome2Features[genomeRef]
-                for feature in genome['features']:
-                    if feature['id'] in these_genomeFeatureIds:
-                        if 'protein_translation' not in feature or feature['protein_translation'] == None:
-                            self.log(console,"bad CDS Feature "+feature['id']+": no protein_translation found")
-                            self.log(invalid_msgs,"bad CDS Feature "+feature['id']+": no protein_translation found")
-                            continue
-                        else:
-                            #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
+
+                # Genome
+                if genome_type == 'KBaseGenomes.Genome':
+                    genome = genome_obj['data']
+                    genomeSciName[genomeRef] = genome['scientific_name']
+
+                    for feature in genome['features']:
+                        if feature['id'] in these_genomeFeatureIds:
+                            if 'protein_translation' not in feature or feature['protein_translation'] == None:
+                                self.log(console,"bad CDS Feature "+feature['id']+": no protein_translation found")
+                                self.log(invalid_msgs,"bad CDS Feature "+feature['id']+": no protein_translation found")
+                                continue
+                            else:
+                                #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
+                                this_id = genomeRef + genome_id_feature_id_delim + feature['id']
+                                this_id = re.sub ('\s', '_', this_id)
+                                short_feature_id = re.sub("^.*\.([^\.]+)\.([^\.]+)$", r"\1.\2", feature['id'])
+
+                                genome_disp_name = ''
+                                if 'obj_name' in params.get('genome_disp_name_config'):
+                                    genome_disp_name += genomeObjName[genomeRef]
+                                    if 'ver' in params.get('genome_disp_name_config'):
+                                        genome_disp_name += '.v'+str(genomeObjVer[genomeRef])
+
+                                    if genome_type == "KBaseGenomes.Genome" and \
+                                       'sci_name' in params.get('genome_disp_name_config'):
+                                        genome_disp_name += ': '+genomeSciName[genomeRef]
+                                else:
+                                    genome_disp_name = genomeObjName[genomeRef]
+                
+                                row_labels[this_id] = genome_disp_name+' - '+short_feature_id
+
+                                #record = SeqRecord(Seq(feature['protein_translation']), id=feature['id'], description=genome['id'])
+                                record = SeqRecord(Seq(feature['protein_translation']), id=this_id, description=genome['id'])
+                                proteins_found += 1
+                                records_by_fid[this_id] = record
+
+                # AnnotatedMetagenomeAssembly
+                elif genome_type == 'KBaseMetagenomes.AnnotatedMetagenomeAssembly':
+                    ama_features = self._get_features_from_AnnotatedMetagenomeAssembly (ctx, genomeRef)
+                    for feature in ama_features:
+                        if feature['id'] in these_genomeFeatureIds:
+                            if not feature.get('protein_translatkon'):
+                                self.log(console,"bad CDS Feature "+feature['id']+": no protein_translation found")
+                                self.log(invalid_msgs,"bad CDS Feature "+feature['id']+": no protein_translation found")
+                                continue
                             this_id = genomeRef + genome_id_feature_id_delim + feature['id']
-                            this_id = re.sub ('\s', '_', this_id)
                             short_feature_id = re.sub("^.*\.([^\.]+)\.([^\.]+)$", r"\1.\2", feature['id'])
-                            row_labels[this_id] = genomeSciName[genomeRef]+' - '+short_feature_id
-                            #record = SeqRecord(Seq(feature['protein_translation']), id=feature['id'], description=genome['id'])
-                            record = SeqRecord(Seq(feature['protein_translation']), id=this_id, description=genome['id'])
+                            genome_disp_name = genomeObjName[genomeRef]
+                            row_labels[this_id] = genome_disp_name+' - '+short_feature_id
+
+                            record = SeqRecord(Seq(feature['protein_translation']), id=this_id, description=genomeObjName)
                             proteins_found += 1
                             records_by_fid[this_id] = record
 
+                                
             if proteins_found < 2:
                 self.log(invalid_msgs,"Less than 2 protein Features (CDS) found.  exiting...")
             else:

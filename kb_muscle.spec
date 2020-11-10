@@ -22,12 +22,16 @@ module kb_muscle {
 
 
     /* MUSCLE Input Params
+    **
+    ** MUSCLE_prot(): input_ref must be FeatureSet
+    ** MUSCLE_nuc(): input_ref must be FeatureSet, SingleEndLibrary, or AssemblySet
     */
     typedef structure {
         workspace_name workspace_name;
 	string         desc;
 	data_obj_ref   input_ref;
         data_obj_name  output_name;
+        string         genome_disp_name_config;
 	int            maxiters;
 	float          maxhours;
     } MUSCLE_Params;

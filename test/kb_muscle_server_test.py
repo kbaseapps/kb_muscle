@@ -3,11 +3,15 @@ import os  # noqa: F401
 import time
 import unittest
 import uuid
-from configparser import ConfigParser  # py3
 from os import environ
 
+try:
+    from ConfigParser import ConfigParser  # py2
+except:
+    from configparser import ConfigParser  # py3
+
 from installed_clients.WorkspaceClient import Workspace as workspaceService
-from kb_muscle.authclient import KBaseAuth as _KBaseAuth
+from installed_clients.authclient import KBaseAuth as _KBaseAuth
 from kb_muscle.kb_muscleImpl import kb_muscle
 from kb_muscle.kb_muscleServer import MethodContext
 
@@ -123,6 +127,7 @@ class kb_muscleTest(unittest.TestCase):
                 'desc':           'test MUSCLE nuc',
                 'input_ref':      featureSet_ref,
                 'output_name':    obj_out_name,
+                'genome_disp_name_config':   'obj_name_ver_sci_name',
                 'maxiters':       '16',
                 'maxhours':       '0.5',
                 'workspace_name': self.getWsName()
@@ -195,6 +200,7 @@ class kb_muscleTest(unittest.TestCase):
                 'desc':           'test MUSCLE nuc',
                 'input_ref':      featureSet_ref,
                 'output_name':    obj_out_name,
+                'genome_disp_name_config':   'obj_name_ver_sci_name',
                 'maxiters':       '16',
                 'maxhours':       '0.5',
                 'workspace_name': self.getWsName()
