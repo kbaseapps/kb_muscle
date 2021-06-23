@@ -1,3 +1,8 @@
+### Version 1.1.1
+- added github actions testing
+- added unit test for AMA features
+- made unit test data uploaded by test
+
 ### Version 1.1.0
 - added FeatureSet containing AnnotatedMetagenomeAssembly features as valid input type to MUSCLE_prot
 - fixed path to contact kbase help
