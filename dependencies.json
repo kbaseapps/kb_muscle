@@ -11,6 +11,10 @@
   "type" : "sdk",
   "version_tag" : "release"
 }, {
+  "module_name" : "GenomeFileUtil",
+  "type" : "sdk",
+  "version_tag" : "release"
+}, {
   "module_name" : "kb_ObjectUtilities",
   "type" : "sdk",
   "version_tag" : "release"

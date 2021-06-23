@@ -68,7 +68,7 @@ description : |
 
     <p><b>Inputs and Parameters:</b></p>
     <ul>
-      <li>Input Features: The KBase FeatureSet object with protein-coding genes to align. The FeatureSet can be built with <a href=”https://narrative.kbase.us/#catalog/apps/FeatureSetUtils/build_feature_set/aeec07a3dc538b31071cdf1642cb9c346bfb35a2”>Build Feature Set from Genome</a>, <a href=”https://narrative.kbase.us/#catalog/apps/kb_SetUtilities/KButil_Merge_FeatureSet_Collection/73dd817a7ddab6c2615d2e6e6a145a32e1a4db64”>Merge FeatureSets</a>, and/or <a href=”https://narrative.kbase.us/#catalog/apps/kb_SetUtilities/KButil_Logical_Slice_Two_FeatureSets/73dd817a7ddab6c2615d2e6e6a145a32e1a4db64”>Logical Slice Two FeatureSets</a>. FeatureSets are also created as output from BLAST and HMMER Apps.</li>
+      <li>Input Features: The KBase FeatureSet object with protein-coding genes from Genomes or Annotated Metagenome Assemblies to align. The FeatureSet can be built with <a href=”https://narrative.kbase.us/#catalog/apps/FeatureSetUtils/build_feature_set/aeec07a3dc538b31071cdf1642cb9c346bfb35a2”>Build Feature Set from Genome</a>, <a href=”https://narrative.kbase.us/#catalog/apps/kb_SetUtilities/KButil_Merge_FeatureSet_Collection/73dd817a7ddab6c2615d2e6e6a145a32e1a4db64”>Merge FeatureSets</a>, and/or <a href=”https://narrative.kbase.us/#catalog/apps/kb_SetUtilities/KButil_Logical_Slice_Two_FeatureSets/73dd817a7ddab6c2615d2e6e6a145a32e1a4db64”>Logical Slice Two FeatureSets</a>. FeatureSets are also created as output from BLAST and HMMER Apps.</li>
       <li>MSA Description: A description for the output object is mandatory. It is part of the object download but serves no other purpose.</li>
       <li>Max Iterations: The upper bound for the number of iterations if MUSCLE fails to converge.</li>
       <li>Max Hours: The upper bound for the number of hours if MUSCLE fails to converge. Hours are in decimal format (e.g. enter "0.5" for 30 minutes).</li>
@@ -84,7 +84,7 @@ description : |
     </ul>
     </p>
 
-    <p><strong>Team members who implemented algorithm in KBase:</strong> Dylan Chivian. For questions, please <a href=”http://kbase.us/contact-us/”>contact us</a>.</p>
+    <p><strong>Team members who implemented algorithm in KBase:</strong> <a href="https://narrative.kbase.us/#people/dylan">Dylan Chivian</a>. For questions, please <a href=”http://kbase.us/contact-us/”>contact us</a>.</p>
 
 publications :
     -
