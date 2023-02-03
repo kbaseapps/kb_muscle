@@ -454,9 +454,9 @@ class kb_muscle:
                 # Genome
                 if genome_type == 'KBaseGenomes.Genome':
                     genome = genome_obj['data']
-                    genomeSciName[genomeRef] = genome['scientific_name']
+                    genomeSciName[genomeRef] = genome.get('scientific_name')
 
-                    all_features = genome['features'] + genome['non_coding_features']
+                    all_features = genome.get('features') + genome.get('non_coding_features')
 
                     for feature in all_features:
                         if feature['id'] in these_genomeFeatureIds:
@@ -1165,9 +1165,9 @@ class kb_muscle:
                 # Genome
                 if genome_type == 'KBaseGenomes.Genome':
                     genome = genome_obj['data']
-                    genomeSciName[genomeRef] = genome['scientific_name']
+                    genomeSciName[genomeRef] = genome.get('scientific_name')
 
-                    for feature in genome['features']:
+                    for feature in genome.get('features'):
                         if feature['id'] in these_genomeFeatureIds:
                             if 'protein_translation' not in feature or feature['protein_translation'] == None:
                                 self.log(invalid_msgs,"bad CDS Feature "+feature['id']+": no protein_translation found")
