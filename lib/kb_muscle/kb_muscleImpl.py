@@ -481,10 +481,6 @@ class kb_muscle:
                             record = SeqRecord(Seq(feature['dna_sequence']), id=this_id, description=genome['id'])
                             records_by_fid[this_id] = record
 
-                            # DEBUG
-                            print("THIS_ID: '"+this_id+"'")
-                            print("RECORD: '"+record+"'")
-                            
                 # AnnotatedMetagenomeAssembly
                 elif genome_type == 'KBaseMetagenomes.AnnotatedMetagenomeAssembly':
                     ama_features = self._get_features_from_AnnotatedMetagenomeAssembly (ctx, genomeRef)
@@ -507,12 +503,6 @@ class kb_muscle:
             records = []
             for fId in feature_order:
                 genomeRef = featureSet_elements[fId][0]
-
-                # DEBUG
-                print("GENOME_REF: '"+genomeRef+"'")
-                print("FID: '"+fId+"'")
-                print("NEW_ID: '"+new_id[genomeRef][fId]+"'")
-                            
                 records.append(records_by_fid[new_id[genomeRef][fId]])
             SeqIO.write(records, input_forward_reads_file_path, "fasta")
 
