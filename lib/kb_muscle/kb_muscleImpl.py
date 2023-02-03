@@ -455,7 +455,10 @@ class kb_muscle:
                 if genome_type == 'KBaseGenomes.Genome':
                     genome = genome_obj['data']
                     genomeSciName[genomeRef] = genome['scientific_name']
-                    for feature in genome['features']:
+
+                    all_features = genome['features'] + genome['non_coding_features']
+
+                    for feature in all_features:
                         if feature['id'] in these_genomeFeatureIds:
                             #self.log(console,"kbase_id: '"+feature['id']+"'")  # DEBUG
                             this_id = genomeRef + genome_id_feature_id_delim + feature['id']
