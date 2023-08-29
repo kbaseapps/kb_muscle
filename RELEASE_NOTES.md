@@ -1,3 +1,6 @@
+### Version 1.1.2
+- fixed bug with MUSCLE_nuc which was failing to scan non-coding-features
+
 ### Version 1.1.1
 - added github actions testing
 - added unit test for AMA features
