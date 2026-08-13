@@ -64,8 +64,7 @@ parameters :
 
 description : |
     <p>This App builds a Multiple Sequence Alignment (MSA) of nucleotide sequences with MUSCLE. MUSCLE is one of the most widely-used methods in biology. It performs an MSA and does so, according to their website, “with accuracy and speed that are consistently better than CLUSTALW”. The KBase implementation takes a FeatureSet object with a list of DNA references, extracts the sequences, and performs the alignment. The MSA can then be downloaded in FASTA and Clustal format. The MSA is also stored as an MSA data object in KBase for downstream analysis Apps such as <a href=”https://narrative.kbase.us/#catalog/apps/kb_fasttree/run_FastTree/release”>FASTTREE-2 Phylogenetic Tree Builder</a>.</p>
-    <p>The MUSCLE nucleotide app can also accept a SingleEndLibrary (e.g. 16S amplicons).</p>
-    <!--or AssemblySet object as the input to align.  If the sequence is an AssemblySet, make sure that each Assembly contains one and only one contig, and that the contigs themselves are not too long (such as for viral assemblies).</p>-->
+    <p>The MUSCLE nucleotide app can also accept a SingleEndLibrary (e.g. 16S amplicons), or an Assembly or AssemblySet object as the input to align. Each contig in the Assembly (or in every Assembly of the AssemblySet) is aligned as its own sequence, so this works best when each Assembly contains one and only one contig, and the contigs themselves are not too long (such as for viral assemblies).</p>
 
     <p><b>Inputs and Parameters:</b></p>
     <ul>

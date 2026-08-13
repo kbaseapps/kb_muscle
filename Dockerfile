@@ -9,13 +9,21 @@ MAINTAINER KBase Developer
 # RUN apt-get update
 
 # Install MUSCLE
-#
+
 RUN mkdir -p /kb/module/muscle/bin && \
     cd /kb/module/muscle/bin && \
-    curl http://drive5.com/muscle/muscle3.8.425_binaries.tar.gz > muscle3.8.425_binaries.tar.gz && \
+    curl -fL https://drive5.com/muscle/muscle3.8.425_binaries.tar.gz > muscle3.8.425_binaries.tar.gz && \
     tar xfz muscle3.8.425_binaries.tar.gz && \
     ln -s muscle3.8.425_i86linux64 muscle && \
-    rm muscle3.8.425_binaries.tar.gz 
+    rm muscle3.8.425_binaries.tar.gz
+
+# CLEAN VARIANT (use this for GitHub / CI / anyone off this network):
+# RUN mkdir -p /kb/module/muscle/bin && \
+#     cd /kb/module/muscle/bin && \
+#     curl -fL https://drive5.com/muscle/muscle3.8.425_binaries.tar.gz > muscle3.8.425_binaries.tar.gz && \
+#     tar xfz muscle3.8.425_binaries.tar.gz && \
+#     ln -s muscle3.8.425_i86linux64 muscle && \
+#     rm muscle3.8.425_binaries.tar.gz
 
 # -----------------------------------------
 

@@ -24,7 +24,7 @@ module kb_muscle {
     /* MUSCLE Input Params
     **
     ** MUSCLE_prot(): input_ref must be FeatureSet
-    ** MUSCLE_nuc(): input_ref must be FeatureSet, SingleEndLibrary, or AssemblySet
+    ** MUSCLE_nuc(): input_ref must be FeatureSet, SingleEndLibrary, Assembly, or AssemblySet
     */
     typedef structure {
         workspace_name workspace_name;
@@ -54,7 +54,7 @@ module kb_muscle {
     /*  Methods for MSA building of either DNA or PROTEIN sequences
     **
     **    overloading as follows:
-    **        input_ref: SingleEndLibrary (just MUSCLE_nuc), FeatureSet (both)
+    **        input_ref: SingleEndLibrary, Assembly, AssemblySet (just MUSCLE_nuc), FeatureSet (both)
     **        output_name: MSA
     */
     funcdef MUSCLE_nuc (MUSCLE_Params params)  returns (MUSCLE_Output) authentication required;

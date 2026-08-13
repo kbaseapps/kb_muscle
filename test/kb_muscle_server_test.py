@@ -16,6 +16,7 @@ from pprint import pprint  # noqa: F401
 
 from installed_clients.WorkspaceClient import Workspace as workspaceService
 from installed_clients.GenomeFileUtilClient import GenomeFileUtil
+from installed_clients.SetAPIServiceClient import SetAPI
 from installed_clients.authclient import KBaseAuth as _KBaseAuth
 from kb_muscle.kb_muscleImpl import kb_muscle
 from kb_muscle.kb_muscleServer import MethodContext
@@ -200,6 +201,21 @@ class kb_muscleTest(unittest.TestCase):
         self.__class__.amaName_list[item_i] = ama_basename
         return new_obj_info
 
+    # call this method to pull the ref of the first member Assembly out of
+    # an existing AssemblySet, so single-Assembly tests can reuse whatever
+    # AssemblySet is already wired up for the AssemblySet tests instead of
+    # needing their own separate fixture.
+    def getFirstAssemblyRefFromSet(self, assembly_set_ref):
+        try:
+            setAPI = SetAPI(self.getImpl().serviceWizardURL, token=self.getContext()['token'])
+        except Exception as e:
+            raise ValueError("unable to instantiate SetAPI Client: "+str(e))
+        assembly_set_data = setAPI.get_assembly_set_v1({'ref': assembly_set_ref, 'include_item_info': 0})
+        assembly_items = assembly_set_data['data']['items']
+        if not assembly_items:
+            raise ValueError('AssemblySet '+assembly_set_ref+' has no members')
+        return assembly_items[0]['ref']
+
 
     ##############
     # UNIT TESTS #
@@ -293,6 +309,90 @@ class kb_muscleTest(unittest.TestCase):
         self.assertEqual(created_obj_0_info[TYPE_I].split('-')[0], obj_out_type)
         pass
         
+
+    #### test_MUSCLE_nuc_02():  test AssemblySet input
+    ##
+    # HIDE @unittest.skip("skipped test_MUSCLE_nuc_02()")  # uncomment to skip
+    ##
+    def test_MUSCLE_nuc_02(self):
+        obj_out_name = 'test_MUSCLE_nuc_02'
+        obj_out_type = 'KBaseTrees.MSA'
+
+        [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+
+        assemblySet_ref = '77634/4/1'  # e.g. '12345/6/1'
+
+        output_dir = os.path.join(self.scratch,'fasta_out_nuc_02.'+str(uuid.uuid4()))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        parameters = {
+                'desc':           'test MUSCLE nuc on AssemblySet',
+                'input_ref':      assemblySet_ref,
+                'output_name':    obj_out_name,
+                'genome_disp_name_config':   'obj_name_ver_sci_name',
+                'maxiters':       '16',
+                'maxhours':       '0.5',
+                'workspace_name': self.getWsName()
+                }
+        ret = self.getImpl().MUSCLE_nuc(self.getContext(), parameters)[0]
+        self.assertIsNotNone(ret['report_ref'])
+
+        # check created obj
+        report_obj = self.getWsClient().get_objects([{'ref':ret['report_ref']}])[0]['data']
+        self.assertIsNotNone(report_obj['objects_created'][0]['ref'])
+
+        created_obj_0_info = self.getWsClient().get_object_info_new({'objects':[{'ref':report_obj['objects_created'][0]['ref']}]})[0]
+        self.assertEqual(created_obj_0_info[NAME_I], obj_out_name)
+        self.assertEqual(created_obj_0_info[TYPE_I].split('-')[0], obj_out_type)
+        pass
+
+
+    #### test_MUSCLE_nuc_03():  test single Assembly input
+    ##
+    # Reuses the same AssemblySet ref as test_MUSCLE_nuc_02 above, but at run
+    # time pulls out just its first member Assembly ref and aligns that one
+    # assembly's contigs against each other. This only exercises the plain
+    # 'Assembly' input_ref branch (type-coverage), not a scientifically
+    # meaningful alignment -- if that assembly happens to have only one
+    # contig, MUSCLE itself will error out wanting >=2 sequences to align;
+    # pick a multi-contig assembly in the set if that happens.
+    # HIDE @unittest.skip("skipped test_MUSCLE_nuc_03()")  # uncomment to skip
+    ##
+    def test_MUSCLE_nuc_03(self):
+        obj_out_name = 'test_MUSCLE_nuc_03'
+        obj_out_type = 'KBaseTrees.MSA'
+
+        [OBJID_I, NAME_I, TYPE_I, SAVE_DATE_I, VERSION_I, SAVED_BY_I, WSID_I, WORKSPACE_I, CHSUM_I, SIZE_I, META_I] = range(11)  # object_info tuple
+
+        assemblySet_ref = '77634/4/1'  # same set used by test_MUSCLE_nuc_02
+        assembly_ref = "77634/2/1"
+
+        output_dir = os.path.join(self.scratch,'fasta_out_nuc_03.'+str(uuid.uuid4()))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        parameters = {
+                'desc':           'test MUSCLE nuc on single Assembly',
+                'input_ref':      assembly_ref,
+                'output_name':    obj_out_name,
+                'genome_disp_name_config':   'obj_name_ver_sci_name',
+                'maxiters':       '16',
+                'maxhours':       '0.5',
+                'workspace_name': self.getWsName()
+                }
+        ret = self.getImpl().MUSCLE_nuc(self.getContext(), parameters)[0]
+        self.assertIsNotNone(ret['report_ref'])
+
+        # check created obj
+        report_obj = self.getWsClient().get_objects([{'ref':ret['report_ref']}])[0]['data']
+        self.assertIsNotNone(report_obj['objects_created'][0]['ref'])
+
+        created_obj_0_info = self.getWsClient().get_object_info_new({'objects':[{'ref':report_obj['objects_created'][0]['ref']}]})[0]
+        self.assertEqual(created_obj_0_info[NAME_I], obj_out_name)
+        self.assertEqual(created_obj_0_info[TYPE_I].split('-')[0], obj_out_type)
+        pass
+
 
     #### test_MUSCLE_prot_01()
     ##

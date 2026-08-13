@@ -1,3 +1,6 @@
+### Version 1.1.3
+- Added support for assemblies and assembly sets
+
 ### Version 1.1.2
 - fixed bug with MUSCLE_nuc which was failing to scan non-coding-features
 

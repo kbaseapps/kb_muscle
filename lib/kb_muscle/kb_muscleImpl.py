@@ -247,11 +247,12 @@ class kb_muscle:
         Methods for MSA building of either DNA or PROTEIN sequences
         **
         **    overloading as follows:
-        **        input_ref: SingleEndLibrary (just MUSCLE_nuc), FeatureSet (both)
+        **        input_ref: SingleEndLibrary, Assembly, AssemblySet (just MUSCLE_nuc), FeatureSet (both)
         **        output_name: MSA
         :param params: instance of type "MUSCLE_Params" (MUSCLE Input Params
            ** ** MUSCLE_prot(): input_ref must be FeatureSet ** MUSCLE_nuc():
-           input_ref must be FeatureSet, SingleEndLibrary, or AssemblySet) ->
+           input_ref must be FeatureSet, SingleEndLibrary, Assembly, or
+           AssemblySet) ->
            structure: parameter "workspace_name" of type "workspace_name" (**
            The workspace object refs are of form: ** **    objects =
            ws.get_objects([{'ref':
@@ -506,12 +507,6 @@ class kb_muscle:
                 records.append(records_by_fid[new_id[genomeRef][fId]])
             SeqIO.write(records, input_forward_reads_file_path, "fasta")
 
-        # Missing proper input_input_type
-        #
-        else:
-            raise ValueError('Cannot yet handle input_ref type of: '+input_type_name)
-
-        """
         # AssemblySet
         #
         elif input_type_name == 'AssemblySet':
@@ -524,8 +519,86 @@ class kb_muscle:
             except Exception as e:
                 raise ValueError ("unable to instantiate AssemblyUtil Client")
 
-            # HERE
-        """
+            assembly_id_contig_id_delim = '.c:'
+
+            # expand the AssemblySet into its member Assembly refs
+            try:
+                assembly_set_data = SetAPI_Client.get_assembly_set_v1({
+                    'ref': params['input_ref'],
+                    'include_item_info': 1
+                })
+            except Exception as e:
+                raise ValueError('Unable to fetch AssemblySet '+params['input_ref']+': '+str(e))
+
+            assembly_items = assembly_set_data['data']['items']
+            if not assembly_items:
+                raise ValueError('AssemblySet '+params['input_ref']+' has no members')
+
+            assembly_refs = [item['ref'] for item in assembly_items]
+
+            # pull FASTA files for every assembly member in one batch call
+            try:
+                fastas_by_ref = auClient.get_fastas({'ref_lst': assembly_refs})
+            except Exception as e:
+                raise ValueError('Unable to fetch assembly FASTA files: '+str(e))
+
+            # read each assembly's FASTA, relabel contigs, and collect them
+            records = []
+            for item in assembly_items:
+                assembly_ref = item['ref']
+                assembly_name = item['info'][NAME_I] if item.get('info') else assembly_ref
+                assembly_disp_name = item.get('label') or assembly_name
+
+                for fasta_path in fastas_by_ref[assembly_ref]['paths']:
+                    for contig_record in SeqIO.parse(fasta_path, 'fasta'):
+                        this_id = assembly_ref+assembly_id_contig_id_delim+contig_record.id
+                        row_labels[this_id] = assembly_disp_name+' - '+contig_record.id
+                        contig_record.id = this_id
+                        contig_record.description = assembly_name
+                        records.append(contig_record)
+
+            # export contigs to FASTA file for MUSCLE
+            input_forward_reads_file_path = os.path.join(self.scratch, input_name+".fasta")
+            self.log(console, 'writing fasta file: '+input_forward_reads_file_path)
+            SeqIO.write(records, input_forward_reads_file_path, "fasta")
+
+        # Assembly
+        #
+        elif input_type_name == 'Assembly':
+            try:
+                auClient = AssemblyUtil(self.callbackURL, token=ctx['token'])
+            except Exception as e:
+                raise ValueError ("unable to instantiate AssemblyUtil Client")
+
+            assembly_id_contig_id_delim = '.c:'
+            assembly_ref = params['input_ref']
+
+            # pull the FASTA file for this single assembly
+            try:
+                fasta_result = auClient.get_assembly_as_fasta({'ref': assembly_ref})
+            except Exception as e:
+                raise ValueError('Unable to fetch assembly FASTA file: '+str(e))
+
+            assembly_disp_name = fasta_result['assembly_name']
+
+            # read the assembly's FASTA, relabel contigs, and collect them
+            records = []
+            for contig_record in SeqIO.parse(fasta_result['path'], 'fasta'):
+                this_id = assembly_ref+assembly_id_contig_id_delim+contig_record.id
+                row_labels[this_id] = assembly_disp_name+' - '+contig_record.id
+                contig_record.id = this_id
+                contig_record.description = assembly_disp_name
+                records.append(contig_record)
+
+            # export contigs to FASTA file for MUSCLE
+            input_forward_reads_file_path = os.path.join(self.scratch, input_name+".fasta")
+            self.log(console, 'writing fasta file: '+input_forward_reads_file_path)
+            SeqIO.write(records, input_forward_reads_file_path, "fasta")
+        # Missing proper input_input_type
+        #
+        else:
+            raise ValueError('Cannot yet handle input_ref type of: '+input_type_name)
+
         
 
         ### Construct the command
@@ -958,7 +1031,8 @@ class kb_muscle:
         """
         :param params: instance of type "MUSCLE_Params" (MUSCLE Input Params
            ** ** MUSCLE_prot(): input_ref must be FeatureSet ** MUSCLE_nuc():
-           input_ref must be FeatureSet, SingleEndLibrary, or AssemblySet) ->
+           input_ref must be FeatureSet, SingleEndLibrary, Assembly, or
+           AssemblySet) ->
            structure: parameter "workspace_name" of type "workspace_name" (**
            The workspace object refs are of form: ** **    objects =
            ws.get_objects([{'ref':
